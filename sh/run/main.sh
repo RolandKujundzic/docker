@@ -27,8 +27,7 @@ start)
 		_stop_http
 	fi
 
-	echo -e "\ndocker rm $DOCKER_NAME; docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE\n"
-	docker rm $DOCKER_NAME
+	echo -e "\ndocker run $DOCKER_RUN --rm --name $DOCKER_NAME rk:$DOCKER_IMAGE\n"
 	docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE
 	;;
 stop)
