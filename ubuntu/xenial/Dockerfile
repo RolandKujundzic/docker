@@ -7,7 +7,9 @@ MAINTAINER Roland Kujundzic <roland@kujundzic.de>
 
 ENV TERM xterm-256color
 
-# RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+# be noninteractive only during build
+ARG DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get -y update && apt-get -y upgrade
 
 # install basic tools
@@ -18,6 +20,10 @@ RUN apt-get -y install dialog curl vim nano sudo wget language-pack-de openssh-c
 RUN apt-get -y install apache2 libapache2-mod-php7.0 mariadb-client mariadb-server php7.0-mysql php7.0-imap sqlite3 php7.0-sqlite3 \
 	mongodb php-mongodb php7.0-mbstring php7.0-mcrypt php7.0-zip php7.0-xsl php7.0-tidy php7.0-json php7.0-gd php7.0-curl php7.0-soap \
 	php-xdebug imagemagick telnet
+
+# compile apcu
+RUN apt-get -y install php7.0-dev php-pear
+RUN yes '' | pecl install apcu && echo "extension=apcu.so" > /etc/php/7.0/mods-available/apcu.ini && phpenmod -v 7.0 -s ALL apcu
 
 # configure shell, timezone, language
 RUN rm -f /bin/sh; cd /bin; ln -s bash sh; \
