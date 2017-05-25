@@ -32,7 +32,8 @@ RUN echo "xdebug.show_error_trace = 1" >> /etc/php/7.0/mods-available/xdebug.ini
 RUN useradd -U -u 1000 -G sudo -m -s /bin/bash rk
 
 # config files
-COPY entrypoint.sh /sbin
+COPY volume /
+
 ENTRYPOINT ["/sbin/entrypoint.sh"]
 
 # start apache2 + mysql
