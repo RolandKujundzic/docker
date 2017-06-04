@@ -2,8 +2,10 @@ DOCKER_NAME=
 DOCKER_IMAGE=
 STOP_HTTP=1
 
-if test -d /Users/rk/Desktop/workspace; then
-	DOCKER_MOUNT="-v /Users/rk/Desktop/workspace:/docker/workspace"
+if test -d /Users/$USER/Desktop/workspace; then
+	DOCKER_MOUNT="-v /Users/$USER/Desktop/workspace:/docker/workspace"
+elif test -d /home/$USER/Desktop/workspace; then
+	DOCKER_MOUNT="-v /home/$USER/Desktop/workspace:/docker/workspace"
 fi
 
 if test -f /etc/passwd; then
