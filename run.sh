@@ -5,7 +5,7 @@ MERGE2RUN="syntax abort is_running stop_http main"
 #------------------------------------------------------------------------------
 # Abort with SYNTAX: message.
 #
-# @global APP(=$0), APP_DESC
+# @global APP, APP_DESC
 # @param message
 #------------------------------------------------------------------------------
 function _syntax {
@@ -121,7 +121,7 @@ fi
 . $1/config.sh
 
 if test -z "$DOCKER_IMAGE"; then
-	DOCKER_IMAGE=`echo $1 | sed -e 's/\//_/g'`
+	DOCKER_IMAGE=`echo $1 | sed -e 's/\//_/g' -`
 fi
 
 if test -z "$DOCKER_NAME"; then
@@ -139,8 +139,7 @@ start)
 		_stop_http
 	fi
 
-	echo -e "\ndocker rm $DOCKER_NAME; docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE\n"
-	docker rm $DOCKER_NAME
+	echo -e "\ndocker run $DOCKER_RUN --rm --name $DOCKER_NAME rk:$DOCKER_IMAGE\n"
 	docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE
 	;;
 stop)
