@@ -1,0 +1,45 @@
+alpine/letsencrypt:
+
+https://letsencrypt.readthedocs.io/en/latest/using.html#running-with-docker
+https://github.com/vimagick/dockerfiles/blob/master/certbot/docker-compose.yml
+https://github.com/diafygi/letsencrypt-nosudo/issues/59
+https://github.com/jessfraz/dockerfiles/blob/master/certbot/Dockerfile
+https://hub.docker.com/r/aptalca/nginx-letsencrypt/~/dockerfile/
+https://hub.docker.com/r/linuxserver/letsencrypt/
+https://hub.docker.com/r/jrcs/letsencrypt-nginx-proxy-companion/
+https://github.com/pierreprinetti/certbot !
+https://github.com/gzm55/docker-certbot !
+https://github.com/IFSight/docker-certbot
+https://github.com/pslobo/dockerized-certbot
+https://github.com/certbot/certbot/blob/master/Dockerfile
+https://hub.docker.com/r/adamant/alpine-certbot/ !!!
+https://hub.docker.com/r/sebble/letsencrypt-certbot-alpine/~/dockerfile/
+https://github.com/certbot/certbot/issues/4014
+
+other:
+------
+https://github.com/jwilder/nginx-proxy
+https://hub.docker.com/r/sdelements/lets-chat/
+https://github.com/jessfraz/dockerfiles
+
+android:
+--------
+https://github.com/mindrunner/docker-android-sdk/blob/master/Dockerfile
+https://hub.docker.com/r/runmymind/docker-android-sdk/
+https://hub.docker.com/r/codetroopers/jenkins-slave-jdk8-android/~/dockerfile/
+https://hub.docker.com/r/xaethos/android-sdk-resource/
+https://hub.docker.com/r/jacekmarchwicki/android/~/dockerfile/
+https://hub.docker.com/r/uber/android-build-environment/~/dockerfile/
+https://hub.docker.com/r/brcomconcretesolutions/jenkins-androidsdk/~/dockerfile/
+https://hub.docker.com/r/jangrewe/gitlab-ci-android/~/dockerfile/
+https://hub.docker.com/r/soluto/android-nodejs/~/dockerfile/
+
+gui:
+----
+http://fabiorehm.com/blog/2014/09/11/running-gui-apps-with-docker/
+https://stackoverflow.com/questions/16296753/can-you-run-gui-apps-in-a-docker-container
+http://subuser.org/ !?!                                                                                       
+http://wiki.ros.org/docker/Tutorials/GUI
+https://linuxmeerkat.wordpress.com/2014/10/17/running-a-gui-application-in-a-docker-container/ !!
+https://linoxide.com/linux-how-to/run-gui-apps-docker-container/
+ 
