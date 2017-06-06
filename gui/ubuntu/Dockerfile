@@ -7,7 +7,7 @@ ENV TERM xterm-256color
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-	apt-get install -y --no-install-recommends sudo wget && \
+	apt-get install -y --no-install-recommends dialog apt-utils sudo wget && \
 	rm -rf /var/lib/apt/lists/*
 
 # Replace uid.gid = 1000.1000 if necessary
@@ -17,7 +17,8 @@ RUN export uid=1000 gid=1000 && \
   echo "rk:x:${uid}:" >> /etc/group && \
   echo "rk ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/rk && \
   chmod 0440 /etc/sudoers.d/rk && \
-  chown ${uid}:${gid} -R /home/rk
+  chown ${uid}:${gid} -R /home/rk && \
+	usermod -a -G audio,video rk
 
 ENV DISPLAY :0
 
