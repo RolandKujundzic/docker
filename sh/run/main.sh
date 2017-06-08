@@ -9,7 +9,8 @@ fi
 . $1/config.sh
 
 if test -z "$DOCKER_IMAGE"; then
-	DOCKER_IMAGE=`echo $1 | sed -e 's/\//_/g' -`
+	echo "1=[$1]"
+	DOCKER_IMAGE=`echo "$1" | sed -e 's#[/ ]#_#g'`
 fi
 
 if test -z "$DOCKER_NAME"; then
