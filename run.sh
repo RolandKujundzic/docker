@@ -1,5 +1,5 @@
 #!/bin/bash
-MERGE2RUN="syntax abort is_running stop_http main"
+MERGE2RUN="syntax abort is_running os_type stop_http docker_rm docker_stop main"
 
 
 #------------------------------------------------------------------------------
@@ -48,6 +48,8 @@ function _abort {
 #
 # @param Process Expression Name 
 # @param Regular Expression if first parameter is CUSTOM e.g. [a]pache2
+# @require os_type
+# @os linux
 # @return "$1_running"
 #------------------------------------------------------------------------------
 function _is_running {
@@ -55,6 +57,11 @@ function _is_running {
 	if test -z "$1"; then
 		_abort "no process name"
 	fi
+
+	local OS_TYPE=$(_os_type)
+	if test "$OS_TYPE" != "linux"; then
+		return
+	fi		
 
 	# use [a] = a to ignore "grep process"
 	local APACHE2='[a]pache2.*k start'
@@ -83,12 +90,36 @@ function _is_running {
 
 
 #------------------------------------------------------------------------------
+# Return linux, macos, cygwin.
+#
+# @print string
+#------------------------------------------------------------------------------
+function _os_type {
+	if [ "$(uname)" = "Darwin" ]; then
+		echo "macos"        
+	elif [ test "$OSTYPE" = "linux-gnu" ]; then
+		echo "linux"
+	elif [ $(expr substr $(uname -s) 1 5) = "Linux" ]; then
+		echo "linux"
+	elif [ $(expr substr $(uname -s) 1 5) = "MINGW" ]; then
+		echo "cygwin"
+	fi
+}
+
+#------------------------------------------------------------------------------
 # Stop webserver (apache2, nginx) on port 80 if running.
 # Ignore docker webservice on port 80.
 #
-# @require is_running
+# @require is_running os_type
+# @os linux
 #------------------------------------------------------------------------------
 function _stop_http {
+
+  local OS_TYPE=$(_os_type)
+  if test "$OS_TYPE" != "linux"; then
+    return
+  fi
+
   if test "$(_is_running PORT 80)" != "PORT_running"; then
     echo "no service on port 80"
     return
@@ -113,6 +144,39 @@ function _stop_http {
 }
 
 
+#------------------------------------------------------------------------------
+# Remove stopped docker container (if found).
+#
+# @param name
+# @require docker_stop
+#------------------------------------------------------------------------------
+function _docker_rm {
+	_docker_stop "$1"
+
+	local HAS_CONTAINER=`docker ps -a | grep "$1"`
+
+	if ! test -z "$HAS_CONTAINER"; then
+		echo "docker rm $1"
+		docker rm "$1"
+	fi
+}
+
+
+#------------------------------------------------------------------------------
+# Stop running docker container (if found).
+#
+# @param name
+#------------------------------------------------------------------------------
+function _docker_stop {
+	local HAS_CONTAINER=`docker ps | grep "$1"`
+
+	if ! test -z "$HAS_CONTAINER"; then
+		echo "docker stop $1"
+		docker stop "$1"
+	fi
+}
+
+
 APP=$0
 
 if ! test -d "$1"; then
@@ -122,7 +186,6 @@ fi
 . $1/config.sh
 
 if test -z "$DOCKER_IMAGE"; then
-	echo "1=[$1]"
 	DOCKER_IMAGE=`echo "$1" | sed -e 's#[/ ]#_#g'`
 fi
 
@@ -143,17 +206,13 @@ start)
 		_stop_http
 	fi
 
-	if ! test -z $(docker ps -a | grep $DOCKER_NAME); then
-		echo "docker rm $DOCKER_NAME"
-		docker rm $DOCKER_NAME
-	fi
+	_docker_rm $DOCKER_NAME
 
 	echo "docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE"
 	docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE
 	;;
 stop)
-	echo "docker stop $DOCKER_NAME"
-	docker stop $DOCKER_NAME
+	_docker_stop $DOCKER_NAME
 	;;
 *)
 	_syntax "container/image [build|start|stop]"
