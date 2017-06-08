@@ -16,8 +16,10 @@ fi
 service mysql start
 service apache2 start
 
-# create mysql administrator account sql:geheim
-# echo "GRANT ALL PRIVILEGES ON *.* TO 'sql'@'localhost' IDENTIFIED BY 'geheim' WITH GRANT OPTION" | mysql -u root
+if ! test -z "$SQL_PASS"; then
+	# create mysql administrator account sql:$SQL_PASS
+	echo "GRANT ALL PRIVILEGES ON *.* TO 'sql'@'localhost' IDENTIFIED BY '$SQL_PASS' WITH GRANT OPTION" | mysql -u root
+fi
 
 if test -f /docker/workspace/run.sh; then
 	# create workspace environment
@@ -26,4 +28,3 @@ if test -f /docker/workspace/run.sh; then
 fi
 
 exec "$@"
-
