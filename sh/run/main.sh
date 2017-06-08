@@ -9,7 +9,6 @@ fi
 . $1/config.sh
 
 if test -z "$DOCKER_IMAGE"; then
-	echo "1=[$1]"
 	DOCKER_IMAGE=`echo "$1" | sed -e 's#[/ ]#_#g'`
 fi
 
@@ -30,17 +29,13 @@ start)
 		_stop_http
 	fi
 
-	if ! test -z $(docker ps -a | grep $DOCKER_NAME); then
-		echo "docker rm $DOCKER_NAME"
-		docker rm $DOCKER_NAME
-	fi
+	_docker_rm $DOCKER_NAME
 
 	echo "docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE"
 	docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE
 	;;
 stop)
-	echo "docker stop $DOCKER_NAME"
-	docker stop $DOCKER_NAME
+	_docker_stop $DOCKER_NAME
 	;;
 *)
 	_syntax "container/image [build|start|stop]"
