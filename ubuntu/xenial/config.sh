@@ -14,4 +14,4 @@ if test -f /etc/passwd; then
   DOCKER_UID_GID="-e SET_UID=$SET_UID -e SET_GID=$SET_GID"
 fi
 
-DOCKER_RUN="-it -p 80:80 -p 443:443 $DOCKER_MOUNT $DOCKER_UID_GID"
+DOCKER_RUN="-it -p 80:80 -p 443:443 -e SQL_PASS='admin' $DOCKER_MOUNT $DOCKER_UID_GID"
