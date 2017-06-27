@@ -12,7 +12,7 @@ if test -f /etc/passwd; then
   SET_UID=`id -u`
   SET_GID=`id -g`
 
-	if test "$SET_GID" ge 1000 && test "$SET_UID" ge 1000
+	if test "$SET_GID" -ge 1000 && test "$SET_UID" -ge 1000
 	then
 	  DOCKER_UID_GID="-e SET_UID=$SET_UID -e SET_GID=$SET_GID"
 	fi
