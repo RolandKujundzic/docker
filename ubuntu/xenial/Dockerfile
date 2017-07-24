@@ -31,8 +31,9 @@ RUN rm -f /bin/sh; cd /bin; ln -s bash sh; \
 	echo "Europe/Berlin" > /etc/timezone; dpkg-reconfigure -f noninteractive tzdata; \
 	echo "de_DE.UTF-8 UTF-8" >> /var/lib/locales/supported.d/de; dpkg-reconfigure -f noninteractive locales
 
-# configure php xdebug
-RUN echo "xdebug.show_error_trace = 1" >> /etc/php/7.0/mods-available/xdebug.ini
+# configure apache + php
+RUN a2enmod rewrite && \
+	echo "xdebug.show_error_trace = 1" >> /etc/php/7.0/mods-available/xdebug.ini
 
 # use "docker run -u rk" to run as user rk
 RUN useradd -U -u 1000 -G sudo -m -s /bin/bash rk
