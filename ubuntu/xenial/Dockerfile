@@ -32,7 +32,7 @@ RUN rm -f /bin/sh; cd /bin; ln -s bash sh; \
 	echo "de_DE.UTF-8 UTF-8" >> /var/lib/locales/supported.d/de; dpkg-reconfigure -f noninteractive locales
 
 # configure apache + php
-RUN a2enmod rewrite && \
+RUN a2enmod rewrite headers && \
 	echo "xdebug.show_error_trace = 1" >> /etc/php/7.0/mods-available/xdebug.ini
 
 # use "docker run -u rk" to run as user rk
