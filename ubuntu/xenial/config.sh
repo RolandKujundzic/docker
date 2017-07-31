@@ -1,5 +1,3 @@
-DOCKER_NAME=
-DOCKER_IMAGE=
 STOP_HTTP=1
 
 if test -d /Users/$USER/Desktop/workspace; then

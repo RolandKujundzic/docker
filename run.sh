@@ -177,10 +177,14 @@ function _docker_stop {
 }
 
 
+#------------------------------------------------------------------------------
+# M A I N
+#------------------------------------------------------------------------------
+
 APP=$0
 
 if ! test -d "$1"; then
-	_syntax "container/image build|start|stop" 
+	_syntax "[container/image] [build|start|stop]\n\nDOCKER_NAME=MyContainer ./run.sh ubuntu/xenial start" 
 fi
 
 . $1/config.sh
