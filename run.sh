@@ -212,8 +212,8 @@ start)
 
 	_docker_rm $DOCKER_NAME
 
-	echo "docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE"
-	docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE
+	echo "docker run $DOCKER_RUN -e LANG=de_DE.UTF-8 --name $DOCKER_NAME rk:$DOCKER_IMAGE"
+	docker run $DOCKER_RUN -e LANG=de_DE.UTF-8 --name $DOCKER_NAME rk:$DOCKER_IMAGE
 	;;
 stop)
 	_docker_stop $DOCKER_NAME
