@@ -31,6 +31,8 @@ RUN rm -f /bin/sh; cd /bin; ln -s bash sh; \
 	echo "Europe/Berlin" > /etc/timezone; dpkg-reconfigure -f noninteractive tzdata; \
 	echo "de_DE.UTF-8 UTF-8" >> /var/lib/locales/supported.d/de; dpkg-reconfigure -f noninteractive locales
 
+ENV LANG=de_DE.UTF-8 LANGUAGE=de_DE:de LC_ALL=de_DE.UTF-8  
+
 # configure apache + php
 RUN a2enmod rewrite headers && \
 	echo "xdebug.show_error_trace = 1" >> /etc/php/7.0/mods-available/xdebug.ini

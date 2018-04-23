@@ -1,25 +1,5 @@
 #!/bin/bash
-MERGE2RUN="syntax abort is_running os_type stop_http docker_rm docker_stop main"
-
-
-#------------------------------------------------------------------------------
-# Abort with SYNTAX: message.
-# Usually APP=$0
-#
-# @global APP, APP_DESC
-# @param message
-#------------------------------------------------------------------------------
-function _syntax {
-	echo -e "\nSYNTAX: $APP $1\n" 1>&2
-
-	if ! test -z "$APP_DESC"; then
-		echo -e "$APP_DESC\n\n" 1>&2
-	else
-		echo 1>&2
-	fi
-
-	exit 1
-}
+MERGE2RUN="abort docker_rm docker_stop is_running rm stop_http syntax main"
 
 
 #------------------------------------------------------------------------------
@@ -30,6 +10,39 @@ function _syntax {
 function _abort {
 	echo -e "\nABORT: $1\n\n" 1>&2
 	exit 1
+}
+
+
+#------------------------------------------------------------------------------
+# Remove stopped docker container (if found).
+#
+# @param name
+# @require _docker_stop
+#------------------------------------------------------------------------------
+function _docker_rm {
+	_docker_stop "$1"
+
+	local HAS_CONTAINER=`docker ps -a | grep "$1"`
+
+	if ! test -z "$HAS_CONTAINER"; then
+		echo "docker rm $1"
+		docker rm "$1"
+	fi
+}
+
+
+#------------------------------------------------------------------------------
+# Stop running docker container (if found).
+#
+# @param name
+#------------------------------------------------------------------------------
+function _docker_stop {
+	local HAS_CONTAINER=`docker ps | grep "$1"`
+
+	if ! test -z "$HAS_CONTAINER"; then
+		echo "docker stop $1"
+		docker stop "$1"
+	fi
 }
 
 
@@ -48,7 +61,7 @@ function _abort {
 #
 # @param Process Expression Name 
 # @param Regular Expression if first parameter is CUSTOM e.g. [a]pache2
-# @require os_type
+# @require _abort _os_type
 # @os linux
 # @return "$1_running"
 #------------------------------------------------------------------------------
@@ -90,27 +103,38 @@ function _is_running {
 
 
 #------------------------------------------------------------------------------
-# Return linux, macos, cygwin.
+# Remove files/directories.
 #
-# @print string
+# @param path_list
+# @param int (optional - abort if set and path is invalid)
+# @require _abort
 #------------------------------------------------------------------------------
-function _os_type {
-	if [ "$(uname)" = "Darwin" ]; then
-		echo "macos"        
-	elif [ "$OSTYPE" = "linux-gnu" ]; then
-		echo "linux"
-	elif [ $(expr substr $(uname -s) 1 5) = "Linux" ]; then
-		echo "linux"
-	elif [ $(expr substr $(uname -s) 1 5) = "MINGW" ]; then
-		echo "cygwin"
+function _rm {
+
+	if test -z "$1"; then
+		_abort "Empty remove path list"
 	fi
+
+	local a=; for a in $1
+	do
+		if ! test -f $a && ! test -d $a
+		then
+			if ! test -z "$2"; then
+				_abort "No such file or directory $a"
+			fi
+		else
+			echo "remove $a"
+			rm -rf $a
+		fi
+	done
 }
+
 
 #------------------------------------------------------------------------------
 # Stop webserver (apache2, nginx) on port 80 if running.
 # Ignore docker webservice on port 80.
 #
-# @require is_running os_type
+# @require _is_running _os_type
 # @os linux
 #------------------------------------------------------------------------------
 function _stop_http {
@@ -145,35 +169,22 @@ function _stop_http {
 
 
 #------------------------------------------------------------------------------
-# Remove stopped docker container (if found).
+# Abort with SYNTAX: message.
+# Usually APP=$0
 #
-# @param name
-# @require docker_stop
+# @global APP, APP_DESC
+# @param message
 #------------------------------------------------------------------------------
-function _docker_rm {
-	_docker_stop "$1"
+function _syntax {
+	echo -e "\nSYNTAX: $APP $1\n" 1>&2
 
-	local HAS_CONTAINER=`docker ps -a | grep "$1"`
-
-	if ! test -z "$HAS_CONTAINER"; then
-		echo "docker rm $1"
-		docker rm "$1"
+	if ! test -z "$APP_DESC"; then
+		echo -e "$APP_DESC\n\n" 1>&2
+	else
+		echo 1>&2
 	fi
-}
 
-
-#------------------------------------------------------------------------------
-# Stop running docker container (if found).
-#
-# @param name
-#------------------------------------------------------------------------------
-function _docker_stop {
-	local HAS_CONTAINER=`docker ps | grep "$1"`
-
-	if ! test -z "$HAS_CONTAINER"; then
-		echo "docker stop $1"
-		docker stop "$1"
-	fi
+	exit 1
 }
 
 
@@ -212,8 +223,8 @@ start)
 
 	_docker_rm $DOCKER_NAME
 
-	echo "docker run $DOCKER_RUN -e LANG=de_DE.UTF-8 --name $DOCKER_NAME rk:$DOCKER_IMAGE"
-	docker run $DOCKER_RUN -e LANG=de_DE.UTF-8 --name $DOCKER_NAME rk:$DOCKER_IMAGE
+	echo "docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE"
+	docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE
 	;;
 stop)
 	_docker_stop $DOCKER_NAME
