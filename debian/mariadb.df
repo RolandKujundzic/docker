@@ -7,6 +7,8 @@ LABEL vendor="Roland Kujundzic <roland@kujundzic.de>"
 
 RUN apt-get -y install mariadb-client mariadb-server
 
+COPY mysql-create /usr/local/bin/mysql-create
+
 COPY run.sh /root/run.sh
 EXPOSE 22 3306
 CMD ["/root/run.sh"]

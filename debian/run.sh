@@ -8,6 +8,8 @@ for a in $START_SERVICE; do
 	fi
 done
 
+mysql-create "$DB_NAME" "$DB_PASS"
+
 while sleep 60; do
 	for a in $START_SERVICE; do 
 		if test -f /etc/init.d/$a; then 
