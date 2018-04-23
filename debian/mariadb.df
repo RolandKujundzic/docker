@@ -1,0 +1,12 @@
+#
+# BUILD: docker build -t rk:mariadb -f mariadb.df .
+#
+
+FROM rk:debian_base
+LABEL vendor="Roland Kujundzic <roland@kujundzic.de>"
+
+RUN apt-get -y install mariadb-client mariadb-server
+
+COPY run.sh /root/run.sh
+EXPOSE 22 3306
+CMD ["/root/run.sh"]

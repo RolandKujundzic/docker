@@ -1,0 +1,14 @@
+# BUILD: docker build $BUILD_PARAM -t rk:mariadb -f mariadb.df .
+# RUN: start docker container for the first time as background process
+# RUN_PARAM="-e TZ=Europe/Berlin -e LANG=de_DE.UTF-8 -e LANGUAGE=de_DE:de -e COLUMNS=170 -e LINES=1000 -e TERM=xterm" 
+docker run -d $RUN_PARAM -p 1022:22 -p 3306:3306 --name CNAME rk:debian_base
+
+# SSH: login into container as rk (has sudo priv) via ssh - pass: magic
+ssh -p 1022 rk@localhost
+
+# ENTER: login into container as root via docker exec
+docker exec -it CNAME bash
+
+# START/STOP: start or stop existing container (docker ps -a) 
+docker start|stop talents
+

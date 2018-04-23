@@ -1,0 +1,36 @@
+#
+# BUILD_PARAM="--build-arg USER_NAME=rk --build-arg USER_PASS=magic"
+# BUILD: docker build $BUILD_PARAM -t rk:debian_base -f debian_base.df .
+#
+
+FROM debian:latest
+LABEL vendor="Roland Kujundzic <roland@kujundzic.de>"
+
+# base installation
+ARG DEBIAN_FRONTEND=noninteractive 
+RUN apt-get -y update 
+RUN apt-get -y install locales vim nano git wget curl sudo
+
+ENV TZ=Europe/Berlin LANG=de_DE.UTF-8 LANGUAGE=de_DE:de COLUMNS=170 LINES=1000 TERM=xterm
+
+# set /bin/sh=/bin/bash, locale=de_DE.UTF-8, timezone=Europe/Berlin
+RUN ln -sf /bin/bash /bin/sh; \
+	ln -sf /usr/share/zoneinfo/$TZ /etc/localtime; echo $TZ > /etc/timezone; \
+	localedef -i de_DE -c -f UTF-8 -A /usr/share/locale/locale.alias de_DE.UTF-8
+
+# custom installation
+RUN apt-get -y install openssh-client openssh-server 
+
+COPY run.sh /root/run.sh
+
+# create user with ssh login and sudo priv
+ARG USER_NAME=rk
+ARG USER_PASS=magic
+RUN mkdir /webhome && \
+	useradd -U -u 1000 -G sudo -m -d /webhome/$USER_NAME -s /bin/bash $USER_NAME && \
+	echo "$USER_NAME:$USER_PASS" | chpasswd && \
+	echo "export LANG=de_DE.UTF-8" >> /webhome/$USER_NAME/.bashrc
+
+WORKDIR /webhome
+EXPOSE 22
+CMD ["/root/run.sh"]
