@@ -3,7 +3,7 @@
 # BUILD: docker build $BUILD_PARAM -t rk:debian_base -f debian_base.df .
 #
 
-FROM debian:latest
+FROM debian:stretch
 LABEL vendor="Roland Kujundzic <roland@kujundzic.de>"
 
 # base installation
