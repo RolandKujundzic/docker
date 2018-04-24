@@ -1,0 +1,13 @@
+#
+# BUILD: docker build -t rk:nginx -f nginx.df .
+#
+
+FROM rk:debian_base
+LABEL vendor="Roland Kujundzic <roland@kujundzic.de>"
+
+RUN apt-get -y install nginx php7.0-cli php7.0-mysql php7.0-mcrypt php7.0-mbstring php7.0-json php7.0-zip \
+	php7.0-curl php7.0-gd php7.0-imap
+
+COPY run.sh /root/run.sh
+EXPOSE 80 443
+CMD ["/root/run.sh"]
