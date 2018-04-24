@@ -36,5 +36,5 @@ echo "create database $DB_NAME"
 echo "CREATE DATABASE $DB_NAME" | mysql -u root
 
 echo "create database $DB_NAME account $DB_NAME:$DB_PASS"
-echo "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_NAME'@'localhost' IDENTIFIED BY '$DB_PASS'" | mysql -u root
+echo "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_NAME'@'%' IDENTIFIED BY '$DB_PASS'" | mysql -u root
 

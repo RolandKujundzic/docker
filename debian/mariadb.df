@@ -6,6 +6,8 @@ FROM rk:debian_base
 LABEL vendor="Roland Kujundzic <roland@kujundzic.de>"
 
 RUN apt-get -y install mariadb-client mariadb-server
+COPY mysqld.patch /root/mysqld.patch
+RUN patch /etc/mysql/mariadb.conf.d/50-server.cnf /root/mysqld.patch
 
 COPY mysql-create /usr/local/bin/mysql-create
 

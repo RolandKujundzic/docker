@@ -20,6 +20,8 @@ RUN ln -sf /bin/bash /bin/sh; \
 
 # custom installation
 RUN apt-get -y install openssh-client openssh-server 
+COPY sshd_config.patch /root/sshd_config.patch
+RUN patch /etc/ssh/sshd_config /root/sshd_config.patch
 
 COPY run.sh /root/run.sh
 
