@@ -1,0 +1,12 @@
+--- 50-server.original.cnf	2018-04-24 12:43:12.149492619 +0200
++++ 50-server.cnf	2018-04-24 12:26:48.093324468 +0200
+@@ -26,7 +26,8 @@
+ 
+ # Instead of skip-networking the default is now to listen only on
+ # localhost which is more compatible and is not less secure.
+-bind-address		= 127.0.0.1
++# bind-address		= 127.0.0.1
++bind-address		= 0.0.0.0
+ 
+ #
+ # * Fine Tuning
