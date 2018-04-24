@@ -12,3 +12,11 @@ docker exec -it CNAME bash
 # START/STOP: start or stop existing container (docker ps -a) 
 docker start|stop talents
 
+# create database
+docker run -d -p 1022:22 -p 13306:3306 --name talents rk:mariadb
+docker exec -it talents mysql-create test2 abc123
+
+# Connect to mariadb from host
+mysql -h 127.0.0.1 --port=13306 -u USER -p USER
+mysql -h 172.17.0.3 -u USER -p USER
+
