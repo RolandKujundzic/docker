@@ -33,12 +33,14 @@ for a in $START_SERVICE; do
 	fi
 done
 
-mysql-create "$DB_NAME" "$DB_PASS"
+if ! test -z "$DB_NAME" && ! test -z "$DB_PASS"; then
+	mysql-create "$DB_NAME" "$DB_PASS"
+fi
 
 while sleep 60; do
 
 	for a in $STATUS_IS_RUNNING; do 
-		_check_is_running $a "$a is running"
+		_check_is_running $a "is running"
 	done
 
 	_check_is_running mysql "Uptime"
