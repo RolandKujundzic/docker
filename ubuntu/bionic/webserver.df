@@ -1,6 +1,7 @@
 #
 # Webserver image: rk_bionic:base with apache2 + modphp + php7 + mariadb + sqlite3 + mongodb + imagemagick + sshd + pureftpd
 # docker build -t rk_bionic:webserver -f webserver.df .
+# docker run -d -v /path/to/CUSTOMER:/webhome --name CUSTOMER
 #
 
 FROM rk_bionic:base
@@ -16,6 +17,9 @@ RUN apt-get -y install openssh-server mariadb-client mariadb-server
 
 # config files
 COPY webserver /
+
+# enable apache2 multihosting
+RUN a2dissite 000-default && a2enmod vhost_alias
 
 # backup only files from /webhome
 WORKDIR /webhome
