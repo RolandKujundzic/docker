@@ -1,0 +1,28 @@
+#
+# Webserver image: rk_bionic:base with apache2 + modphp + php7 + mariadb + sqlite3 + mongodb + imagemagick + sshd + pureftpd
+# docker build -t rk_bionic:webserver -f webserver.df .
+#
+
+FROM rk_bionic:base
+MAINTAINER Roland Kujundzic <roland@kujundzic.de>
+
+# install php7.2 + apache2 + imagemagick
+RUN apt-get -y install apache2 apache2-utils libapache2-mod-php7.2 php7.2-mysql php7.2-imap php7.2-sqlite3 \
+	php-mongodb php7.2-mbstring php7.2-zip php7.2-xsl php7.2-tidy php7.2-json php7.2-gd php7.2-curl php7.2-soap \
+	php-xdebug sqlite3 imagemagick telnet
+
+# install mariadb + openssh-server - todo: pure-ftpd-mysql, mongodb
+RUN apt-get -y install openssh-server mariadb-client mariadb-server
+
+# config files
+COPY webserver /
+
+# backup only files from /webhome
+WORKDIR /webhome
+VOLUME [ "/webhome" ]
+
+# start script
+ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
+
+# run services
+CMD ["/sbin/docker_cmd.sh"]
