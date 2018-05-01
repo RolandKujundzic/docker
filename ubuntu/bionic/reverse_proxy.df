@@ -13,19 +13,12 @@ RUN apt-get -y install apache2 apache2-utils
 # enable apache2 modules 
 RUN a2enmod proxy proxy_http rewrite deflate headers proxy_balancer proxy_connect proxy_html 
 
-# config files
-COPY reverse_proxy /
-
 # port mapping
 EXPOSE 80 443
-
-# start script
-# ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
 
 # virtual host configuration
 VOLUME ["/etc/apache2/sites-available"]
 
 # run services
-# CMD ["/sbin/docker_cmd.sh"]
 CMD ["/usr/sbin/apachectl", "-e", "info", "-DFOREGROUND"]
 
