@@ -27,6 +27,6 @@ function _check_is_running {
 while sleep 60; do
 	_check_is_running ssh "is running"
 	_check_is_running mysql "Uptime"
-	# _check_is_running apache2 "Uptime"
+	_check_is_running apache2 "is running"
 done
 
