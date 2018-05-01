@@ -1,0 +1,10 @@
+Howto enable domain.tld:
+
+1) create document root in /webhome, e.g. /webhome/domain/www (mkdir -p /webhome/domain/www)
+2) create /website/domain.tld (mkdir -p /website/domain.tld)
+3) link /website/domain.tld/_ to /webhome/domain/www (cd /website/domain.tld; ln -s /webhome/domain/www _)
+
+Howto enable www.domain.tld:
+
+1+2) save as before
+3) link /website/domain.tld/www to /webhome/domain/www (cd /website/domain.tld; ln -s /webhome/domain/www www)
