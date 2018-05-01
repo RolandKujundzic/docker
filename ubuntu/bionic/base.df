@@ -1,0 +1,29 @@
+#
+# Ubuntu bionic with german locale and basic shell software
+# docker build -t rk_bionic:base -f base.df .
+#
+
+FROM ubuntu:bionic
+MAINTAINER Roland Kujundzic <roland@kujundzic.de>
+
+# be noninteractive only during build
+ARG DEBIAN_FRONTEND=noninteractive
+
+# update packages
+RUN apt-get -y update && apt-get -y upgrade
+
+# install basic
+RUN apt-get -y install apt-utils tzdata dialog language-pack-de
+
+# german environment
+ENV TZ=Europe/Berlin LANG=de_DE.UTF-8 LANGUAGE=de_DE:de COLUMNS=170 LINES=1000 TERM=xterm-256color
+
+# set /bin/sh=/bin/bash, locale=de_DE.UTF-8, timezone=Europe/Berlin
+RUN ln -sf /bin/bash /bin/sh; \
+  ln -sf /usr/share/zoneinfo/$TZ /etc/localtime; echo $TZ > /etc/timezone; \
+  localedef -i de_DE -c -f UTF-8 -A /usr/share/locale/locale.alias de_DE.UTF-8
+
+# install basic tools
+RUN apt-get -y install curl vim nano sudo wget openssh-client rsync ssl-cert \
+	patch zip unzip git iputils-ping
+
