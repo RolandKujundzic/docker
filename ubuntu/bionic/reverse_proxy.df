@@ -1,6 +1,7 @@
 #
 # Apache2 reverse proxy
 # docker build -t rk_bionic:reverse_proxy -f reverse_proxy.df .
+# docker run -d -p 80:80 -p 443:443 --name reverse_proxy rk_bionic:reverse_proxy
 #
 
 FROM rk_bionic:base
@@ -9,12 +10,22 @@ MAINTAINER Roland Kujundzic <roland@kujundzic.de>
 # install apache2
 RUN apt-get -y install apache2 apache2-utils
 
+# enable apache2 modules 
+RUN a2enmod proxy proxy_http rewrite deflate headers proxy_balancer proxy_connect proxy_html 
+
 # config files
 COPY reverse_proxy /
 
+# port mapping
+EXPOSE 80 443
+
 # start script
-ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
+# ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
+
+# virtual host configuration
+VOLUME ["/etc/apache2/sites-available"]
 
 # run services
-CMD ["/sbin/docker_cmd.sh"]
+# CMD ["/sbin/docker_cmd.sh"]
+CMD ["/usr/sbin/apachectl", "-e", "info", "-DFOREGROUND"]
 
