@@ -1,0 +1,10 @@
+#
+# Apache2 reverse proxy
+# docker build -t rk_bionic:reverse_proxy -f reverse_proxy.df .
+#
+
+FROM rk_bionic:base
+MAINTAINER Roland Kujundzic <roland@kujundzic.de>
+
+# install apache2
+RUN apt-get -y install apache2 apache2-utils 
