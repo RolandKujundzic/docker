@@ -7,4 +7,14 @@ FROM rk_bionic:base
 MAINTAINER Roland Kujundzic <roland@kujundzic.de>
 
 # install apache2
-RUN apt-get -y install apache2 apache2-utils 
+RUN apt-get -y install apache2 apache2-utils
+
+# config files
+COPY reverse_proxy /
+
+# start script
+ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
+
+# run services
+CMD ["/sbin/docker_cmd.sh"]
+
