@@ -1,11 +1,14 @@
 #
 # Webserver image: rk_bionic:base with apache2 + modphp + php7 + mariadb + sqlite3 + mongodb + imagemagick + sshd + pureftpd
 # docker build -t rk_bionic:webserver -f webserver.df .
-# docker run -d -v /path/to/CUSTOMER:/webhome --name CUSTOMER
+# docker run -d --mount source="/webhome/CUSTOMER",target="/webhome/CUSTOMER",type=bind --name CUSTOMER rk_bionic:webserver
 #
 
 FROM rk_bionic:base
 MAINTAINER Roland Kujundzic <roland@kujundzic.de>
+
+# be noninteractive only during build
+ARG DEBIAN_FRONTEND=noninteractive
 
 # install php7.2 + apache2 + imagemagick
 RUN apt-get -y install apache2 apache2-utils libapache2-mod-php7.2 php7.2-mysql php7.2-imap php7.2-sqlite3 \

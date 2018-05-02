@@ -13,7 +13,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update && apt-get -y upgrade
 
 # install basic
-RUN apt-get -y install apt-utils tzdata dialog language-pack-de
+RUN apt-get -y install apt-utils tzdata dialog language-pack-de bash-completion
 
 # german environment
 ENV TZ=Europe/Berlin LANG=de_DE.UTF-8 LANGUAGE=de_DE:de COLUMNS=170 LINES=1000 TERM=xterm-256color

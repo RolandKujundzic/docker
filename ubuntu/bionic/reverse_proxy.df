@@ -2,22 +2,30 @@
 # Apache2 reverse proxy
 # docker build -t rk_bionic:reverse_proxy -f reverse_proxy.df .
 # docker run -d -p 80:80 -p 443:443 --name reverse_proxy rk_bionic:reverse_proxy
-#
+# docker run -d -p 80:80 -p 443:443 --mount source="/webhome/docker/etc/apache2/sites-available",target="/etc/apache2/sites-available",type=bind \
+#   --mount source="/webhome/docker/etc/letsencrypt",target="/etc/letsencrypt",type=bind --name reverse_proxy rk_bionic:reverse_proxy
 
 FROM rk_bionic:base
 MAINTAINER Roland Kujundzic <roland@kujundzic.de>
+
+# be noninteractive only during build
+ARG DEBIAN_FRONTEND=noninteractive
 
 # install apache2
 RUN apt-get -y install apache2 apache2-utils
 
 # enable apache2 modules 
-RUN a2enmod proxy proxy_http rewrite deflate headers proxy_balancer proxy_connect proxy_html 
+RUN a2dissite 000-default && a2enmod proxy proxy_http rewrite deflate headers proxy_balancer proxy_connect proxy_html 
+
+# install lets encrypt
+RUN apt-get -y install software-properties-common && add-apt-repository -y ppa:certbot/certbot && \
+	apt-get -y update && apt-get -y install python-certbot-apache 
 
 # port mapping
 EXPOSE 80 443
 
 # virtual host configuration
-VOLUME ["/etc/apache2/sites-available"]
+VOLUME ["/etc/apache2/sites-available", "/etc/letsencrypt"]
 
 # run services
 CMD ["/usr/sbin/apachectl", "-e", "info", "-DFOREGROUND"]
