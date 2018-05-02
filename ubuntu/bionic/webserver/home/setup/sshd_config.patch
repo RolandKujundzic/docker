@@ -1,0 +1,14 @@
+--- sshd_config.orig	2018-04-23 21:28:15.801341372 +0200
++++ sshd_config	2018-04-23 21:28:52.692886367 +0200
+@@ -29,9 +29,9 @@
+ # Authentication:
+ 
+ #LoginGraceTime 2m
+-#PermitRootLogin prohibit-password
++PermitRootLogin no
+ #StrictModes yes
+-#MaxAuthTries 6
++MaxAuthTries 3
+ #MaxSessions 10
+ 
+ #PubkeyAuthentication yes
