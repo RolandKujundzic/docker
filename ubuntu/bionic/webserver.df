@@ -21,8 +21,21 @@ RUN apt-get -y install openssh-server mariadb-client mariadb-server
 # config files
 COPY webserver /
 
+# create user with ssh login and sudo priv
+ARG USER_NAME=rk
+ARG USER_PASS=magic
+RUN useradd -U -u 1000 -G sudo -m -d /home/$USER_NAME -s /bin/bash $USER_NAME && \
+	echo "$USER_NAME:$USER_PASS" | chpasswd
+
 # enable apache2 multihosting
-RUN a2dissite 000-default && a2enmod vhost_alias
+RUN patch /etc/ssh/sshd_config /home/setup/sshd_config.patch && \
+	a2dissite 000-default && \
+	a2enmod vhost_alias && \
+	cp /home/setup/.vimrc /home/rk/.vimrc && \
+	cat /home/setup/.bashrc >> /home/rk/.bashrc && \
+	mkdir /webhome && \
+	chown -R rk.rk /webhome && \
+	chown -R rk.rk /home/rk
 
 # backup only files from /webhome
 WORKDIR /webhome
