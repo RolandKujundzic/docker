@@ -4,6 +4,7 @@
 # docker run -d -p 80:80 -p 443:443 --name reverse_proxy rk_bionic:reverse_proxy
 # docker run -d -p 80:80 -p 443:443 --mount source="/webhome/docker/etc/apache2/sites-available",target="/etc/apache2/sites-available",type=bind \
 #   --mount source="/webhome/docker/etc/letsencrypt",target="/etc/letsencrypt",type=bind --name reverse_proxy rk_bionic:reverse_proxy
+#
 
 FROM rk_bionic:base
 MAINTAINER Roland Kujundzic <roland@kujundzic.de>
