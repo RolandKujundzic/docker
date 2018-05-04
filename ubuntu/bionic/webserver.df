@@ -1,7 +1,6 @@
 #
 # Webserver image: rk_bionic:base with apache2 + modphp + php7 + mariadb + sqlite3 + mongodb + imagemagick + sshd + pureftpd
 # docker build -t rk_bionic:webserver -f webserver.df .
-# docker run -d --mount source="/webhome/CUSTOMER",target="/webhome/CUSTOMER",type=bind --name CUSTOMER rk_bionic:webserver
 #
 
 FROM rk_bionic:base
