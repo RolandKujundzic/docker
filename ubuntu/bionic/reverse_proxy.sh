@@ -1,0 +1,2 @@
+DOCKER_IMAGE=rk_bionic:reverse_proxy
+DOCKER_DF=reverse_proxy.df
