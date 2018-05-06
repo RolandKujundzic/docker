@@ -3,15 +3,20 @@
 
 #------------------------------------------------------------------------------
 # Export DOCKER_RUN. Create sql:admin mysql account. Set UID and GID 
-# if /etc/passwd exists. Mount DOCROOT or workspace.
+# if /etc/passwd exists. Mount DOCROOT_SOURCE to /webhome/DOCKER_NAME (=DOCROOT_TARGET)
+# or /path/to/Desktop/workspace to /docker/workspace.
 #------------------------------------------------------------------------------
 function _export_docker_run {
-	if ! test -z "$DOCROOT" && test -d $DOCROOT; then
-  	DOCKER_MOUNT="--mount source=$DOCROOT,target=$DOCROOT,type=bind"
+	if ! test -z "$DOCROOT_SOURCE" && test -d $DOCROOT_SOURCE; then
+		if test -z "$DOCROOT_TARGET"; then
+			DOCROOT_TARGET="/webhome/$DOCKER_NAME"
+		fi
+
+  	DOCKER_MOUNT="--mount type=bind,source=$DOCROOT_SOURCE,target=$DOCROOT_TARGET"
 	elif test -d /Users/$USER/Desktop/workspace; then
-  	DOCKER_MOUNT="--mount source=/Users/$USER/Desktop/workspace,target=/docker/workspace,type=bind"
+  	DOCKER_MOUNT="--mount type=bind,source=/Users/$USER/Desktop/workspace,target=/docker/workspace"
 	elif test -d /home/$USER/Desktop/workspace; then
-  	DOCKER_MOUNT="--mount source=/home/$USER/Desktop/workspace,target=/docker/workspace,type=bind"
+  	DOCKER_MOUNT="--mount type=bind,source=/home/$USER/Desktop/workspace,target=/docker/workspace"
 	fi
 
 	if test -f /etc/passwd; then
@@ -74,10 +79,13 @@ start)
 		_stop_http
 	fi
 
-	_docker_rm $DOCKER_NAME
-
-	echo "docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE"
-	docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE
+	HAS_DOCKER=`docker ps -a | grep $DOCKER_NAME`
+	if test -z "$HAS_DOCKER"; then
+		echo "docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE"
+		docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE
+	else
+		docker start $DOCKER_NAME
+	fi
 	;;
 stop)
 	_docker_stop $DOCKER_NAME

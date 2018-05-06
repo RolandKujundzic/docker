@@ -1,5 +1,5 @@
 #!/bin/bash
-MERGE2RUN="abort docker_rm docker_stop is_running rm stop_http syntax main"
+MERGE2RUN="abort docker_stop is_running stop_http syntax main"
 
 
 #------------------------------------------------------------------------------
@@ -10,24 +10,6 @@ MERGE2RUN="abort docker_rm docker_stop is_running rm stop_http syntax main"
 function _abort {
 	echo -e "\nABORT: $1\n\n" 1>&2
 	exit 1
-}
-
-
-#------------------------------------------------------------------------------
-# Remove stopped docker container (if found).
-#
-# @param name
-# @require _docker_stop
-#------------------------------------------------------------------------------
-function _docker_rm {
-	_docker_stop "$1"
-
-	local HAS_CONTAINER=`docker ps -a | grep "$1"`
-
-	if ! test -z "$HAS_CONTAINER"; then
-		echo "docker rm $1"
-		docker rm "$1"
-	fi
 }
 
 
@@ -103,34 +85,6 @@ function _is_running {
 
 
 #------------------------------------------------------------------------------
-# Remove files/directories.
-#
-# @param path_list
-# @param int (optional - abort if set and path is invalid)
-# @require _abort
-#------------------------------------------------------------------------------
-function _rm {
-
-	if test -z "$1"; then
-		_abort "Empty remove path list"
-	fi
-
-	local a=; for a in $1
-	do
-		if ! test -f $a && ! test -d $a
-		then
-			if ! test -z "$2"; then
-				_abort "No such file or directory $a"
-			fi
-		else
-			echo "remove $a"
-			rm -rf $a
-		fi
-	done
-}
-
-
-#------------------------------------------------------------------------------
 # Stop webserver (apache2, nginx) on port 80 if running.
 # Ignore docker webservice on port 80.
 #
@@ -191,15 +145,20 @@ function _syntax {
 
 #------------------------------------------------------------------------------
 # Export DOCKER_RUN. Create sql:admin mysql account. Set UID and GID 
-# if /etc/passwd exists. Mount DOCROOT or workspace.
+# if /etc/passwd exists. Mount DOCROOT_SOURCE to /webhome/DOCKER_NAME (=DOCROOT_TARGET)
+# or /path/to/Desktop/workspace to /docker/workspace.
 #------------------------------------------------------------------------------
 function _export_docker_run {
-	if ! test -z "$DOCROOT" && test -d $DOCROOT; then
-  	DOCKER_MOUNT="--mount source=$DOCROOT,target=$DOCROOT,type=bind"
+	if ! test -z "$DOCROOT_SOURCE" && test -d $DOCROOT_SOURCE; then
+		if test -z "$DOCROOT_TARGET"; then
+			DOCROOT_TARGET="/webhome/$DOCKER_NAME"
+		fi
+
+  	DOCKER_MOUNT="--mount type=bind,source=$DOCROOT_SOURCE,target=$DOCROOT_TARGET"
 	elif test -d /Users/$USER/Desktop/workspace; then
-  	DOCKER_MOUNT="--mount source=/Users/$USER/Desktop/workspace,target=/docker/workspace,type=bind"
+  	DOCKER_MOUNT="--mount type=bind,source=/Users/$USER/Desktop/workspace,target=/docker/workspace"
 	elif test -d /home/$USER/Desktop/workspace; then
-  	DOCKER_MOUNT="--mount source=/home/$USER/Desktop/workspace,target=/docker/workspace,type=bind"
+  	DOCKER_MOUNT="--mount type=bind,source=/home/$USER/Desktop/workspace,target=/docker/workspace"
 	fi
 
 	if test -f /etc/passwd; then
@@ -262,10 +221,13 @@ start)
 		_stop_http
 	fi
 
-	_docker_rm $DOCKER_NAME
-
-	echo "docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE"
-	docker run $DOCKER_RUN --name $DOCKER_NAME rk:$DOCKER_IMAGE
+	HAS_DOCKER=`docker ps -a | grep $DOCKER_NAME`
+	if test -z "$HAS_DOCKER"; then
+		echo "docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE"
+		docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE
+	else
+		docker start $DOCKER_NAME
+	fi
 	;;
 stop)
 	_docker_stop $DOCKER_NAME
