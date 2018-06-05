@@ -28,6 +28,8 @@ RUN useradd -U -u 1000 -G sudo -m -d /home/$USER_NAME -s /bin/bash $USER_NAME &&
 
 # enable apache2 multihosting
 RUN patch /etc/ssh/sshd_config /home/setup/sshd_config.patch && \
+	patch /etc/php/7.2/apache2/php.ini /home/setup/php.apache2.patch && \
+	patch /etc/php/7.2/cli/php.ini /home/setup/php.cli.patch && \
 	a2dissite 000-default && \
 	a2enmod vhost_alias && \
 	cp /home/setup/.vimrc /home/rk/.vimrc && \
