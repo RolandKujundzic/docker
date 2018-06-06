@@ -14,8 +14,8 @@ RUN apt-get -y install apache2 apache2-utils libapache2-mod-php7.2 php7.2-mysql 
 	php-mongodb php7.2-mbstring php7.2-zip php7.2-xsl php7.2-tidy php7.2-json php7.2-gd php7.2-curl php7.2-soap \
 	php-xdebug sqlite3 imagemagick telnet
 
-# install mariadb + openssh-server - todo: pure-ftpd-mysql, mongodb
-RUN apt-get -y install openssh-server mariadb-client mariadb-server
+# install mariadb + openssh-server - todo: pure-ftpd-mysql, mongodb, cron
+RUN apt-get -y install openssh-server mariadb-client mariadb-server cron
 
 # config files
 COPY webserver /
@@ -34,7 +34,6 @@ RUN patch /etc/ssh/sshd_config /home/setup/sshd_config.patch && \
 	a2enmod vhost_alias && \
 	cp /home/setup/.vimrc /home/rk/.vimrc && \
 	cat /home/setup/.bashrc >> /home/rk/.bashrc && \
-	mkdir /webhome && \
 	chown -R rk.rk /webhome && \
 	chown -R rk.rk /home/rk
 
