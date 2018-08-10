@@ -25,5 +25,5 @@ RUN ln -sf /bin/bash /bin/sh; \
 
 # install basic tools
 RUN apt-get -y install curl vim nano sudo wget openssh-client rsync ssl-cert \
-	patch zip unzip git iputils-ping
+	patch zip unzip git iputils-ping net-tools
 
