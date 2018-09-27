@@ -40,14 +40,14 @@ function _export_docker_run {
 APP=$0
 
 if ! test -f "$1"; then
-	_syntax "[linux/version/config.sh] [build|start|stop]\n\nDOCKER_NAME=MyContainer ./run.sh ubuntu/xenial/config.sh start" 
+	_syntax "[linux/version/config.sh] [build|start|stop|run]\n\nDOCKER_NAME=MyContainer ./run.sh ubuntu/xenial/config.sh start" 
 fi
 
 LINUX_VERSION=`dirname $1`
 
 . $1
 
-if test "$2" = "start"; then
+if test "$2" = "start" || test "$2" = "run"; then
 	_export_docker_run
 fi
 
@@ -74,6 +74,14 @@ build)
 	echo -e "docker build -t $DOCKER_IMAGE $1\nYou might need to type in root password\n"
 	docker build -t $DOCKER_IMAGE -f $LINUX_VERSION/$DOCKER_DF $LINUX_VERSION
 	;;
+run)
+	HAS_DOCKER=`docker ps -a | grep $DOCKER_NAME`
+	if test -z "$HAS_DOCKER"; then
+		echo "docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE"
+	else
+		echo "docker start $DOCKER_NAME"
+	fi
+	;;
 start)
 	if ! test -z "$STOP_HTTP"; then
 		_stop_http
@@ -84,6 +92,7 @@ start)
 		echo "docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE"
 		docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE
 	else
+		echo "docker start $DOCKER_NAME"
 		docker start $DOCKER_NAME
 	fi
 	;;
