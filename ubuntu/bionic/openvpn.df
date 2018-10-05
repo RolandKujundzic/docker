@@ -1,0 +1,21 @@
+#
+# OpenVPN image: rk_bionic:base with openvpn
+# docker build -t rk_bionic:openvpn -f openvpn.df .
+# @see https://github.com/jpetazzo/dockvpn/blob/master/Dockerfile
+#
+
+FROM rk_bionic:base
+MAINTAINER Roland Kujundzic <roland@kujundzic.de>
+
+# be noninteractive only during build
+ARG DEBIAN_FRONTEND=noninteractive
+
+# install openvpn 
+RUN apt-get -y install openvpn iptables socat
+
+# create user with ssh login and sudo priv
+ARG USER_NAME=rk
+ARG USER_PASS=magic
+RUN useradd -U -u 1000 -G sudo -m -d /home/$USER_NAME -s /bin/bash $USER_NAME && \
+	echo "$USER_NAME:$USER_PASS" | chpasswd
+
