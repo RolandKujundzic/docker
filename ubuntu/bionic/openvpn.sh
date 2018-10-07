@@ -1,3 +1,5 @@
 DOCKER_IMAGE=rk_bionic:openvpn
 DOCKER_DF=openvpn.df
-DOCKER_PARAMETER="-e VPN_LOGIN=VpnLogin -e VPN_PASSWORD=VpnPassword -e SERVER_PHP=/path/to/server.php"
+DOCKER_PARAMETER="-e VPN_LOGIN=XXXX -e VPN_PASSWORD=XXXX -e SERVER_PHP=/webhome/XXXX"
+DOCROOT_SOURCE=/webhome/XXXX
+DOCROOT_TARGET=/webhome
