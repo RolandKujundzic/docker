@@ -146,7 +146,8 @@ function _syntax {
 #------------------------------------------------------------------------------
 # Export DOCKER_RUN. Create sql:admin mysql account. Set UID and GID 
 # if /etc/passwd exists. Mount DOCROOT_SOURCE to /webhome/DOCKER_NAME (=DOCROOT_TARGET)
-# or /path/to/Desktop/workspace to /docker/workspace.
+# or /path/to/Desktop/workspace to /docker/workspace. Append DOCKER_PARAMETER
+# to DOCKER_RUN.
 #------------------------------------------------------------------------------
 function _export_docker_run {
 	if ! test -z "$DOCROOT_SOURCE" && test -d $DOCROOT_SOURCE; then
@@ -171,7 +172,7 @@ function _export_docker_run {
   	fi
 	fi
 
-	DOCKER_RUN="-d -e SQL_PASS=admin $DOCKER_MOUNT $DOCKER_UID_GID"
+	DOCKER_RUN="-d -e SQL_PASS=admin $DOCKER_MOUNT $DOCKER_UID_GID $DOCKER_PARAMETER"
 }
 
 
