@@ -11,7 +11,7 @@ MAINTAINER Roland Kujundzic <roland@kujundzic.de>
 ARG DEBIAN_FRONTEND=noninteractive
 
 # install openvpn 
-RUN apt-get -y install openvpn iptables socat
+RUN apt-get -y install openvpn iptables socat lynx
 
 # create user with ssh login and sudo priv
 ARG USER_NAME=rk
@@ -33,5 +33,5 @@ VOLUME [ "/webhome" ]
 ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
 
 # run $SERVER_PHP
-CMD ["php", "-S", "0.0.0.0:80", "echo ${SERVER_PHP}"]
+CMD ["php", "-S", "0.0.0.0:80", "/webhome/bin/server.php"]
 
