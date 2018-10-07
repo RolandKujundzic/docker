@@ -1,5 +1,5 @@
 #
-# OpenVPN image: rk_bionic:base with openvpn
+# OpenVPN image with PHP Server $SERVER_PHP.
 # docker build -t rk_bionic:openvpn -f openvpn.df .
 # @see https://github.com/jpetazzo/dockvpn/blob/master/Dockerfile
 #
@@ -18,4 +18,17 @@ ARG USER_NAME=rk
 ARG USER_PASS=magic
 RUN useradd -U -u 1000 -G sudo -m -d /home/$USER_NAME -s /bin/bash $USER_NAME && \
 	echo "$USER_NAME:$USER_PASS" | chpasswd
+
+# install php server
+RUN apt-get -y install php-cli php-mbstring php-curl
+
+# config files
+COPY openvpn /
+
+# backup only files from /webhome
+WORKDIR /webhome
+VOLUME [ "/webhome" ]
+
+# run server.php
+CMD ["php", "-S", "0.0.0.0:80", "echo ${SERVER_PHP}"]
 
