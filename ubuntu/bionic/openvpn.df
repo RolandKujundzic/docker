@@ -29,6 +29,9 @@ COPY openvpn /
 WORKDIR /webhome
 VOLUME [ "/webhome" ]
 
-# run server.php
+# start script
+ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
+
+# run $SERVER_PHP
 CMD ["php", "-S", "0.0.0.0:80", "echo ${SERVER_PHP}"]
 
