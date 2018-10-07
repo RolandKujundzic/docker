@@ -13,7 +13,7 @@ function _install_docker {
 
 	if test -d /home/$USER; then
 		echo "allow $USER to run docker (login again)"
-  	sudo usermod -aG docker $USER
+		sudo usermod -aG docker $USER
 	fi
 }
 
