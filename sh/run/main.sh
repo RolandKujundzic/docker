@@ -76,7 +76,7 @@ build)
 	docker build -t $DOCKER_IMAGE -f $LINUX_VERSION/$DOCKER_DF $LINUX_VERSION
 	;;
 run)
-	HAS_DOCKER=`docker ps -a | grep $DOCKER_NAME`
+	HAS_DOCKER=`docker ps -a | grep "$DOCKER_NAME\$"`
 	if test -z "$HAS_DOCKER"; then
 		echo "docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE"
 	else
@@ -88,7 +88,7 @@ start)
 		_stop_http
 	fi
 
-	HAS_DOCKER=`docker ps -a | grep $DOCKER_NAME`
+	HAS_DOCKER=`docker ps -a | grep "$DOCKER_NAME\$"`
 	if test -z "$HAS_DOCKER"; then
 		echo "docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE"
 		docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE
