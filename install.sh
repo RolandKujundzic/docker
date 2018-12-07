@@ -11,9 +11,9 @@ function _install_docker {
 	sudo apt-get -y update
 	sudo apt-get -y install docker-ce
 
-	if test -d /home/$USER; then
-		echo "allow $USER to run docker (login again)"
-		sudo usermod -aG docker $USER
+	if test -d /home/$SUDO_USER; then
+		echo "allow $SUDO_USER to run docker (login again)"
+		sudo usermod -aG docker $SUDO_USER
 	fi
 }
 
