@@ -32,9 +32,9 @@ function _download {
 #------------------------------------------------------------------------------
 
 # update URL: https://github.com/docker/compose/releases/
-DOCKER_COMPOSE_URL=https://github.com/docker/compose/releases/download/1.15.0/docker-compose
+DOCKER_COMPOSE_URL=https://github.com/docker/compose/releases/download/1.23.2/docker-compose
 # update URL: https//github.com/docker/machine/releases/
-DOCKER_MACHINE_URL=https://github.com/docker/machine/releases/download/v0.12.2/docker-machine
+DOCKER_MACHINE_URL=https://github.com/docker/machine/releases/download/v0.16.0/docker-machine
 DOCKER_COMPOSE=/usr/local/bin/docker-compose
 DOCKER_MACHINE=/usr/local/bin/docker-machine
 
