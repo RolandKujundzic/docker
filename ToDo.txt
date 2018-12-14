@@ -1,3 +1,5 @@
 https://www.youtube.com/watch?v=KLOdisHW8rQ
 Reduce image size with Multistage builds - from 700 MB to 10 MB
 
+https://www.youtube.com/watch?v=FiaLKwdv9TI
+Twelve-Factor Drupal app using Docker
