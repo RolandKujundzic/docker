@@ -26,12 +26,12 @@ RUN apt-get -y install php-cli php-mbstring php-curl
 COPY openvpn /
 
 # backup only files from /webhome
-WORKDIR /webhome
-VOLUME [ "/webhome" ]
+WORKDIR /webhome/app
+VOLUME [ "/webhome/app" ]
 
 # start script
 ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
 
 # run $SERVER_PHP
-CMD ["php", "-S", "0.0.0.0:80", "/webhome/bin/server.php"]
+CMD ["php", "-S", "0.0.0.0:80", "/webhome/app/bin/server.php"]
 
