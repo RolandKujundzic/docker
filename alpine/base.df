@@ -1,0 +1,27 @@
+#
+# Alpine latest with german locale and basic shell software
+# docker build -t rk_alpine:base -f base.df .
+#
+
+FROM alpine:latest
+MAINTAINER Roland Kujundzic <roland@kujundzic.de>
+
+# update packages: dialog bash-completion
+RUN apk update && apk add --no-cache tzdata openssh-client curl wget rsync git nano vim zip unzip patch openssl
+
+## compile environment: 
+# RUN apk add --no-cache cmake make musl-dev gcc gettext-dev libintl
+
+# german environment: skip COLUMNS=170 LINES=1000 because of vim problems
+ENV TZ=Europe/Berlin LANG=de_DE.UTF-8 LC_ALL=de_DE.UTF-8 LANGUAGE=de_DE:de TERM=xterm-256color
+
+# set timezone and locale
+RUN ln -sf /usr/share/zoneinfo/$TZ /etc/localtime; echo $TZ > /etc/timezone
+
+# COPY locale_1.sh /root
+# ADD locale_1.tgz /
+
+COPY locale.md locale_2.sh /root/
+RUN /root/locale_2.sh
+# RUN localedef -i de_DE -c -f UTF-8 -A /usr/share/locale/locale.alias de_DE.UTF-8
+

@@ -1,0 +1,23 @@
+#
+# Webserver image: rk_alpine:base with apache2 + modphp + php7 + mariadb + sqlite3 + mongodb + imagemagick + sshd + pureftpd
+# docker build -t rk_alpine:webserver -f webserver.df .
+#
+
+FROM rk_alpine:base
+MAINTAINER Roland Kujundzic <roland@kujundzic.de>
+
+# install php7.2 + apache2 + imagemagick
+RUN apk update && apk add --no-cache apache2 apache2-utils php7-apache2 php7-pdo_mysql php7-mysqli php7-imap php7-sqlite3 \
+	php7-pecl-mongodb php7-mbstring php7-zip php7-xsl php7-tidy php7-json php7-gd php7-curl php7-soap \
+	php7-pecl-xdebug sqlite imagemagick
+
+# install mariadb + openssh-server - todo: pure-ftpd-mysql, mongodb
+RUN apk add --no-cache shadow sudo openssh-server mariadb mariadb-client
+
+# create user with ssh login and sudo priv
+ARG USER_NAME=rk
+ARG USER_PASS=magic
+RUN addgroup -S sudo && useradd -U -u 1000 -G sudo -m -d /home/$USER_NAME -s /bin/bash $USER_NAME && \
+	echo "$USER_NAME:$USER_PASS" | chpasswd
+
+

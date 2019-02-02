@@ -1,0 +1,24 @@
+# config files
+COPY webserver /
+
+# enable apache2 multihosting
+RUN patch /etc/ssh/sshd_config /home/setup/sshd_config.patch && \
+	patch /etc/php/7.2/apache2/php.ini /home/setup/php.apache2.patch && \
+	patch /etc/php/7.2/cli/php.ini /home/setup/php.cli.patch && \
+	a2dissite 000-default && \
+	a2enmod rewrite deflate headers vhost_alias && \
+	cp /home/setup/.vimrc /home/rk/.vimrc && \
+	cat /home/setup/.bashrc >> /home/rk/.bashrc && \
+	chown -R rk.rk /webhome && \
+	chown -R rk.rk /home/rk
+
+# backup only files from /webhome
+WORKDIR /webhome/app
+VOLUME [ "/webhome/app" ]
+
+# start script
+ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
+
+# run services
+CMD ["/sbin/docker_cmd.sh"]
+
