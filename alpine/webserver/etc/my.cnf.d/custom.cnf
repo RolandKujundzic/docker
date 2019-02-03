@@ -2,6 +2,7 @@
 default-character-set = utf8mb4
 
 [server]
+log-error = /var/lib/mysql/mysql.err
 pid-file = /run/mysqld/mysqld.pid
 
 [client-server]
