@@ -1,16 +1,15 @@
 #!/bin/bash
 
-if ! test -z "$SET_UID"; then
+if ! test -z "$SET_UID" && ! test "$SET_UID" = "1000"; then
 	usermod -u $SET_UID rk
 fi
 
-if ! test -z "$SET_GID"; then
+if ! test -z "$SET_GID" && ! test "$SET_GID" = "1000"; then
 	groupmod -g $SET_GID rk
 fi
 
 if ! test -d /var/lib/mysql/mysql; then
 	mysql_install_db --user=mysql > /dev/null
-  chown -R mysql.mysql /var/lib/mysql
 
 	if ! test -d "/run/mysqld"; then
 		mkdir -p /run/mysqld
@@ -26,7 +25,7 @@ if ! test -d /var/lib/mysql/mysql; then
 	CREATE_SQL_ADMIN=
 	if ! test -z "$SQL_PASS"; then
 		# create mysql administrator account sql:$SQL_PASS
-		CREATE_SQL_ADMIN="echo \"GRANT ALL PRIVILEGES ON *.* TO 'sql'@'localhost' IDENTIFIED BY '$SQL_PASS' WITH GRANT OPTION;\""
+		CREATE_SQL_ADMIN="GRANT ALL PRIVILEGES ON *.* TO 'sql'@'localhost' IDENTIFIED BY '$SQL_PASS' WITH GRANT OPTION;"
 	fi
 
 	CREATE_DB=
@@ -38,14 +37,17 @@ if ! test -d /var/lib/mysql/mysql; then
 	cat << EOF > $TFILE
 USE mysql;
 UPDATE user SET password=PASSWORD('$MYSQL_ROOT_PASS') WHERE user='root' AND host='localhost';
-DROP DATABASE test;
+FLUSH PRIVILEGES;
+DROP DATABASE IF EXISTS test;
 $CREATE_SQL_ADMIN
+FLUSH PRIVILEGES;
 $CREATE_DB
 EOF
 
+	# --daemonize
 	/usr/bin/mysqld --bootstrap --verbose=1 --skip-name-resolve < $TFILE
 else
-	/usr/bin/mysqld --bootstrap --verbose=0 --skip-name-resolve
+	/usr/bin/mysqld_safe
 fi
 
 ssh-keygen -A
