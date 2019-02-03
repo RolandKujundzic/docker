@@ -22,8 +22,9 @@ function _check {
   fi
 
   if test -z "$IS_RUNNING"; then
-    echo "$1 is not running - kill all processes"
-		ps x | awk {'{print $1}'} | awk 'NR > 1' | xargs kill
+		local TS=`date +'%Y-%m-%d %H:%M:%S'`
+    echo "$1 is not running ($TS) - try restart: $3"
+		$3
   fi
 }
 
@@ -32,8 +33,8 @@ function _check {
 #------------------------------------------------------------------------------
 
 while sleep 60; do
-  _check "sshd" "/var/run/sshd.pid"
-  _check "mysqld" "/var/run/mysqld/mysqld.pid"
-  _check "httpd"
+  _check "sshd" "/var/run/sshd.pid" "/usr/sbin/sshd"
+  _check "mysqld" "/var/run/mysqld/mysqld.pid" "/usr/bin/mysqld_safe"
+  _check "httpd" "" "httpd -D FOREGROUND"
 done
 

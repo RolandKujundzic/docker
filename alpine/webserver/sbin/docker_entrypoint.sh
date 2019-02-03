@@ -60,7 +60,8 @@ fi
 /usr/bin/mysqld_safe
 
 # check processes ... kill container if one is down
-/sbin/docker_check.sh
+/sbin/docker_check.sh &
 
+echo "start: $@"
 exec "$@"
 
