@@ -9,7 +9,7 @@ function _check {
       local MY_PID=`cat "$2"`
       RE="[${MY_PID:0:1}]${MY_PID:1}"
     else
-      echo "PID File $2 missing"
+      echo "PID File $2 of $1 missing"
     fi
   else
     RE="[${1:0:1}]${1:1}"
@@ -31,7 +31,7 @@ function _check {
 # M A I N
 #------------------------------------------------------------------------------
 
-while sleep 10; do
+while sleep 60; do
   _check "sshd" "/var/run/sshd.pid"
   _check "mysqld" "/var/run/mysqld/mysqld.pid"
   _check "httpd"
