@@ -12,7 +12,7 @@ RUN apk update && apk add --no-cache php7 apache2 apache2-proxy apache2-utils ph
 	php7-pecl-xdebug sqlite imagemagick
 
 # install mariadb + openssh-server - todo: pure-ftpd-mysql, mongodb
-RUN apk add --no-cache shadow sudo openssh-server mariadb mariadb-client
+RUN apk add --no-cache pwgen shadow sudo openssh-server mariadb mariadb-client
 
 # create user with ssh login and sudo priv
 ARG USER_NAME=rk
@@ -50,7 +50,7 @@ WORKDIR /webhome/app
 VOLUME [ "/webhome/app" ]
 
 # start script
-#ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
+ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
 
 # run main service: CMD ["/sbin/docker_cmd.sh"]
 CMD httpd -D FOREGROUND
