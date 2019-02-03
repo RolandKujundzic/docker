@@ -32,9 +32,9 @@ sed -i 's/^#LoadModule rewrite_module/LoadModule rewrite_module/' /etc/apache2/h
 sed -i 's/^#LoadModule deflate_module/LoadModule deflate_module/' /etc/apache2/httpd.conf && \
 sed -i 's/^#ServerName www.example.com/ServerName 172.17.0.2/' /etc/apache2/httpd.conf && \
 echo "IncludeOptional /etc/apache2/vhost.d/*.conf" >> /etc/apache2/httpd.conf && \
-mkdir -p /website/0_1 && ln -s /webhome/app /website/0_2/17 && \
+mkdir -p /website/0_1 && ln -s /webhome/app /website/0_1/17 && \
 mkdir -p /website/0_2 && ln -s /webhome/app /website/0_2/17 && \
-mkdir -p /website/0_3 && ln -s /webhome/app /website/0_2/17 && \
+mkdir -p /website/0_3 && ln -s /webhome/app /website/0_3/17 && \
 ln -sf /proc/self/fd/1 /var/log/apache2/access.log && \
 ln -sf /proc/self/fd/1 /var/log/apache2/error.log && \
 mkdir /run/apache2 && \
