@@ -50,7 +50,7 @@ WORKDIR /webhome/app
 VOLUME [ "/webhome/app" ]
 
 # start script
-# ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
+ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
 
 # run main service: CMD ["/sbin/docker_cmd.sh"]
 CMD httpd -D FOREGROUND

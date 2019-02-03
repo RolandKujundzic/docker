@@ -1,6 +1,10 @@
-[client-server]
+[client]
 default-character-set = utf8mb4
+
+[server]
 pid-file = /run/mysqld/mysqld.pid
+
+[client-server]
 socket = /run/mysqld/mysqld.sock
 user = mysql
 port = 3306
