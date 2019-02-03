@@ -59,9 +59,6 @@ if ! test -f /etc/ssh/ssh_host_rsa_key; then
 	ssh-keygen -A
 fi
 
-_log "start sshd: /usr/sbin/sshd"
-/usr/sbin/sshd 
-
 if ! test -d /var/lib/mysql/mysql; then
 	_log "initialize mysql: mysql_install_db --user=mysql"
 	mysql_install_db --user=mysql > /dev/null
@@ -105,12 +102,7 @@ EOF
 	/usr/bin/mysqld --bootstrap --verbose=1 --skip-name-resolve < $TFILE
 fi
 
-_log "start mysqld: /usr/bin/mysqld_safe"
-/usr/bin/mysqld_safe
-
-_log "start apache2: /usr/sbin/httpd -k start"
-/usr/sbin/httpd -k start
-
 _log "exec: $@"
 exec "$@"
+
 

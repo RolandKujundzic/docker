@@ -15,8 +15,6 @@ function _check {
   local TS=`date +'%Y-%m-%d %H:%M:%S'`
   local RE=
 
-  _log "[$TS] check $1 (pid=$2) (port=$3)"
-
   if ! test -z "$2"; then
     if test -f "$2"; then
       local MY_PID=`cat "$2"`
@@ -77,12 +75,27 @@ function _restart_httpd {
 
 
 #------------------------------------------------------------------------------
-# M A I N
-#------------------------------------------------------------------------------
+function _check_all {
+	if test "$1" = "0"; then
+	  local TS=`date +'%Y-%m-%d %H:%M:%S'`
+  	_log "[$TS] check sshd, mysqld, httpd"
+	fi
 
-while sleep 60; do
   _check "sshd" "/var/run/sshd.pid" 22
   _check "mysqld" "/var/run/mysqld/mysqld.pid" 
   _check "httpd" "" 80
+}
+
+
+#------------------------------------------------------------------------------
+# M A I N
+#------------------------------------------------------------------------------
+
+_check_all 0
+
+N=1
+while sleep 60; do
+  _check_all $(($N%60))
+	N=$(($N+1))
 done
 
