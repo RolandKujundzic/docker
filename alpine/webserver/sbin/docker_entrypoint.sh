@@ -8,6 +8,14 @@ if ! test -z "$SET_GID" && ! test "$SET_GID" = "1000"; then
 	groupmod -g $SET_GID rk
 fi
 
+
+if ! test -f /etc/ssh/ssh_host_rsa_key; then
+	ssh-keygen -A
+fi
+
+# start sshd
+/usr/sbin/sshd 
+
 if ! test -d /var/lib/mysql/mysql; then
 	mysql_install_db --user=mysql > /dev/null
 
@@ -30,6 +38,7 @@ if ! test -d /var/lib/mysql/mysql; then
 
 	CREATE_DB=
 	if ! test -z "$DB_NAME" && ! test -z "$DB_PASS"; then
+		echo "[i] Create MySQL Database $DB_NAME and account $DB_NAME:$DB_PASS"
 		CREATE_DB="CREATE DATABASE `$DB_NAME`; GRANT ALL PRIVILEGES ON `$DB_NAME`.* TO '$DB_NAME'@'localhost' IDENTIFIED BY '$DB_PASS';"
 	fi
 
@@ -45,11 +54,10 @@ $CREATE_DB
 EOF
 
 	/usr/bin/mysqld --bootstrap --verbose=1 --skip-name-resolve < $TFILE
-else
-	/usr/bin/mysqld_safe
 fi
 
-ssh-keygen -A
-/usr/sbin/sshd 
+# start mysqld
+/usr/bin/mysqld_safe
 
 exec "$@"
+
