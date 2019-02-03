@@ -24,7 +24,7 @@ RUN echo "CREATE_MAIL_SPOOL=no" >> /etc/default/useradd && addgroup -S sudo && \
 # config files
 COPY webserver /
 
-# configure
+# configure: no ln -sf /proc/self/fd/1 /var/log/apache2/[access|error].log
 RUN patch /etc/ssh/sshd_config /root/setup/sshd_config.patch && \
 patch /etc/php7/php.ini /root/setup/php.cli.patch && \
 sed -i 's/^#LoadModule vhost_alias_module/LoadModule vhost_alias_module/' /etc/apache2/httpd.conf && \
@@ -35,8 +35,6 @@ echo "IncludeOptional /etc/apache2/vhost.d/*.conf" >> /etc/apache2/httpd.conf &&
 mkdir -p /website/0_1 && ln -s /webhome/app /website/0_1/17 && \
 mkdir -p /website/0_2 && ln -s /webhome/app /website/0_2/17 && \
 mkdir -p /website/0_3 && ln -s /webhome/app /website/0_3/17 && \
-ln -sf /proc/self/fd/1 /var/log/apache2/access.log && \
-ln -sf /proc/self/fd/1 /var/log/apache2/error.log && \
 mkdir /run/apache2 && \
 cp /root/setup/.vimrc /home/rk/.vimrc && \
 chown -R rk.rk /webhome && \
@@ -52,6 +50,6 @@ VOLUME [ "/webhome/app" ]
 # start script
 ENTRYPOINT ["/sbin/docker_entrypoint.sh"]
 
-# run main service: CMD ["/sbin/docker_cmd.sh"]
-CMD httpd -D FOREGROUND
+# run main service
+CMD /sbin/docker_check.sh
 
