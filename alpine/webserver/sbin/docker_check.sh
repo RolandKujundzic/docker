@@ -63,7 +63,7 @@ function _restart_sshd {
 #------------------------------------------------------------------------------
 function _restart_mysqld {
   echo "restart mysqld: /usr/bin/mysqld_safe"
-  /usr/bin/mysqld_safe
+  /usr/bin/mysqld_safe &
 }
 
 
