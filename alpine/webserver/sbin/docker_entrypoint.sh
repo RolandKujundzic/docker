@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ash
 
 if ! test -z "$SET_UID" && ! test "$SET_UID" = "1000"; then
 	usermod -u $SET_UID rk
@@ -24,7 +24,7 @@ if ! test -d /var/lib/mysql/mysql; then
 
 	CREATE_SQL_ADMIN=
 	if ! test -z "$SQL_PASS"; then
-		# create mysql administrator account sql:$SQL_PASS
+		echo "[i] Create MySQL Administrator sql:$SQL_PASS"
 		CREATE_SQL_ADMIN="GRANT ALL PRIVILEGES ON *.* TO 'sql'@'localhost' IDENTIFIED BY '$SQL_PASS' WITH GRANT OPTION;"
 	fi
 
@@ -44,7 +44,6 @@ FLUSH PRIVILEGES;
 $CREATE_DB
 EOF
 
-	# --daemonize
 	/usr/bin/mysqld --bootstrap --verbose=1 --skip-name-resolve < $TFILE
 else
 	/usr/bin/mysqld_safe
