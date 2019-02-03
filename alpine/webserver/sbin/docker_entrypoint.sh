@@ -35,6 +35,11 @@ function _docker_log {
   if ! test -L /webhome/app/data/docker/apache_access.log; then
     ln -sf "$DOCKER_LOGDIR/apache_access.log" "/var/log/apache2/access.log"
   fi
+
+  if ! test -L "$DOCKER_LOGDIR/mysql_error.log"; then
+		touch "$DOCKER_LOGDIR/mysql_error.log"
+    ln -sf "$DOCKER_LOGDIR/mysql_error.log" "/var/lib/mysql/mysql.err"
+  fi
 }
 
 
