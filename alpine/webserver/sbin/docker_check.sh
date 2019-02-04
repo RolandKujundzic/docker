@@ -55,21 +55,21 @@ function _check {
 
 #------------------------------------------------------------------------------
 function _restart_sshd {
-  echo "restart sshd: /usr/sbin/sshd"
+  _log "restart sshd: /usr/sbin/sshd"
   /usr/sbin/sshd
 }
 
 
 #------------------------------------------------------------------------------
 function _restart_mysqld {
-  echo "restart mysqld: /usr/bin/mysqld_safe"
+  _log "restart mysqld: /usr/bin/mysqld_safe"
   /usr/bin/mysqld_safe &
 }
 
 
 #------------------------------------------------------------------------------
 function _restart_httpd {
-  echo "restart httpd: /usr/sbin/httpd -k start"
+  _log "restart httpd: /usr/sbin/httpd -k start"
   /usr/sbin/httpd -k start
 }
 
@@ -82,7 +82,8 @@ function _check_all {
   fi
 
   _check "sshd" "/var/run/sshd.pid" 22
-  _check "mysqld" "/var/run/mysqld/mysqld.pid" 
+  _check "mysqld" "/var/run/mysqld/mysqld.pid" 3306 
+	# for PID check: set PidFile in httpd.conf
   _check "httpd" "" 80
 }
 

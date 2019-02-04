@@ -8,7 +8,7 @@ MAINTAINER Roland Kujundzic <roland@kujundzic.de>
 
 # install php7.2 + apache2 + imagemagick:
 RUN apk update && apk add --no-cache php7 apache2 apache2-proxy apache2-utils php7-apache2 php7-pdo_mysql php7-mysqli php7-imap php7-sqlite3 \
-	php7-pecl-mongodb php7-mbstring php7-zip php7-xsl php7-tidy php7-json php7-gd php7-curl php7-soap \
+	php7-pecl-mongodb php7-mbstring php7-zip php7-xsl php7-tidy php7-json php7-gd php7-curl php7-soap php7-posix \
 	php7-pecl-xdebug sqlite imagemagick
 
 # install mariadb + openssh-server - todo: pure-ftpd-mysql, mongodb
@@ -27,6 +27,9 @@ COPY webserver /
 # configure: no ln -sf /proc/self/fd/1 /var/log/apache2/[access|error].log
 RUN patch /etc/ssh/sshd_config /root/setup/sshd_config.patch && \
 patch /etc/php7/php.ini /root/setup/php.cli.patch && \
+sed -i 's/^User apache/User rk/' /etc/apache2/httpd.conf && \
+sed -i 's/^Group apache/Group rk/' /etc/apache2/httpd.conf && \
+sed -i 's/^skip-networking/#skip-networking/' /etc/my.cnf.d/mariadb-server.cnf && \
 sed -i 's/^#LoadModule vhost_alias_module/LoadModule vhost_alias_module/' /etc/apache2/httpd.conf && \
 sed -i 's/^#LoadModule rewrite_module/LoadModule rewrite_module/' /etc/apache2/httpd.conf && \
 sed -i 's/^#LoadModule deflate_module/LoadModule deflate_module/' /etc/apache2/httpd.conf && \
