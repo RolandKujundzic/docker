@@ -7,7 +7,7 @@ FROM alpine:latest
 MAINTAINER Roland Kujundzic <roland@kujundzic.de>
 
 # update packages: dialog bash-completion
-RUN apk update && apk add --no-cache tzdata openssh-client curl wget rsync git nano vim zip unzip patch openssl
+RUN apk update && apk add --no-cache tzdata bash openssh-client curl wget rsync git nano vim zip unzip patch openssl
 
 ## compile environment: 
 # RUN apk add --no-cache cmake make musl-dev gcc gettext-dev libintl
