@@ -37,7 +37,7 @@ RUN patch /etc/ssh/sshd_config /home/setup/sshd_config.patch && \
 	chown -R rk.rk /webhome && \
 	chown -R rk.rk /home/rk
 
-# backup only files from /webhome
+# backup only files from /webhome/app
 WORKDIR /webhome/app
 VOLUME [ "/webhome/app" ]
 
