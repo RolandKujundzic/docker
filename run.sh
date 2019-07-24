@@ -3,12 +3,25 @@ MERGE2RUN="abort docker_stop is_running stop_http syntax main"
 
 
 #------------------------------------------------------------------------------
-# Abort with error message.
+# Abort with error message. Use NO_ABORT=1 for just warning output.
 #
+# @exit
+# @global APP, NO_ABORT
 # @param abort message
 #------------------------------------------------------------------------------
 function _abort {
+	if test "$NO_ABORT" = 1; then
+		echo "WARNING: $1"
+		return
+	fi
+
 	echo -e "\nABORT: $1\n\n" 1>&2
+
+	if ! test -z "$APP"; then
+		# make shure APP dies even if _abort is called from subprocess
+		kill $(ps aux | grep "$APP" | awk '{print $2}')
+	fi
+
 	exit 1
 }
 
@@ -126,11 +139,15 @@ function _stop_http {
 # Abort with SYNTAX: message.
 # Usually APP=$0
 #
-# @global APP, APP_DESC
+# @global APP, APP_DESC, $APP_PREFIX
 # @param message
 #------------------------------------------------------------------------------
 function _syntax {
-	echo -e "\nSYNTAX: $APP $1\n" 1>&2
+	if ! test -z "$APP_PREFIX"; then
+		echo -e "\nSYNTAX: $APP_PREFIX $APP $1\n" 1>&2
+	else
+		echo -e "\nSYNTAX: $APP $1\n" 1>&2
+	fi
 
 	if ! test -z "$APP_DESC"; then
 		echo -e "$APP_DESC\n\n" 1>&2
@@ -150,7 +167,7 @@ function _syntax {
 # to DOCKER_RUN.
 #------------------------------------------------------------------------------
 function _export_docker_run {
-	if ! test -z "$DOCROOT_SOURCE" && test -d $DOCROOT_SOURCE; then
+	if ! test -z "$DOCROOT_SOURCE" && test -d "$DOCROOT_SOURCE"; then
 		if test -z "$DOCROOT_TARGET"; then
 			DOCROOT_TARGET="/webhome/$DOCKER_NAME"
 		fi
