@@ -13,7 +13,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update && apt-get -y upgrade
 
 # install basic tools
-RUN apt-get -y install dialog curl vim nano sudo wget language-pack-de openssh-client rsync ssl-cert realpath patch zip unzip git \
+RUN apt-get -y install dialog curl bc vim nano sudo wget language-pack-de openssh-client rsync ssl-cert realpath patch zip unzip git \
 	iputils-ping apache2-utils  
 
 # install php7 + apache2 + cli + mariadb + sqlite
