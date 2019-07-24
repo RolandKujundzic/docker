@@ -8,7 +8,7 @@
 # to DOCKER_RUN.
 #------------------------------------------------------------------------------
 function _export_docker_run {
-	if ! test -z "$DOCROOT_SOURCE" && test -d $DOCROOT_SOURCE; then
+	if ! test -z "$DOCROOT_SOURCE" && test -d "$DOCROOT_SOURCE"; then
 		if test -z "$DOCROOT_TARGET"; then
 			DOCROOT_TARGET="/webhome/$DOCKER_NAME"
 		fi
