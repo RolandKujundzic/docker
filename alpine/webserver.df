@@ -38,7 +38,7 @@ echo "IncludeOptional /etc/apache2/vhost.d/*.conf" >> /etc/apache2/httpd.conf &&
 mkdir -p /website/0_1 && ln -s /webhome/app /website/0_1/17 && \
 mkdir -p /website/0_2 && ln -s /webhome/app /website/0_2/17 && \
 mkdir -p /website/0_3 && ln -s /webhome/app /website/0_3/17 && \
-mkdir /run/apache2 && \
+test -d /run/apache2 || mkdir -p /run/apache2 && \
 cp /root/setup/.vimrc /home/rk/.vimrc && \
 chown -R rk.rk /webhome && \
 chown -R rk.rk /home/rk
