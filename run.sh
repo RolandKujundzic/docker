@@ -1,6 +1,8 @@
 #!/bin/bash
-MERGE2RUN="abort docker_stop is_running stop_http syntax main"
+MERGE2RUN="abort confirm docker_stop is_running os_type stop_http syntax  main"
 
+
+test -z "$RKSCRIPT_DIR" && RKSCRIPT_DIR=".rkscript"
 
 #------------------------------------------------------------------------------
 # Abort with error message. Use NO_ABORT=1 for just warning output.
@@ -17,12 +19,98 @@ function _abort {
 
 	echo -e "\nABORT: $1\n\n" 1>&2
 
+	local other_pid=
+
+	if ! test -z "$APP_PID"; then
+		# make shure APP_PID dies
+		for a in $APP_PID; do
+			other_pid=`ps aux | grep -E "^.+\\s+$a\\s+" | awk '{print $2}'`
+			test -z "$other_pid" || kill $other_pid 2> /dev/null 1>&2
+		done
+	fi
+
 	if ! test -z "$APP"; then
-		# make shure APP dies even if _abort is called from subprocess
-		kill $(ps aux | grep "$APP" | awk '{print $2}')
+		# make shure APP dies
+		other_pid=`ps aux | grep "$APP" | awk '{print $2}'`
+		test -z "$other_pid" || kill $other_pid 2> /dev/null 1>&2
 	fi
 
 	exit 1
+}
+
+
+#------------------------------------------------------------------------------
+# Show "message  Press y or n  " and wait for key press. 
+# Set CONFIRM=y if y key was pressed. Otherwise set CONFIRM=n if any other 
+# key was pressed or 10 sec expired. Use --q1=y and --q2=n call parameter to confirm
+# question 1 and reject question 2. Set CONFIRM_COUNT= before _confirm if necessary.
+#
+# @param string message
+# @param 2^N flag 1=switch y and n (y = default, wait 3 sec) | 2=auto-confirm (y)
+# @export CONFIRM CONFIRM_TEXT
+#------------------------------------------------------------------------------
+function _confirm {
+	CONFIRM=
+
+	if test -z "$CONFIRM_COUNT"; then
+		CONFIRM_COUNT=1
+	else
+		CONFIRM_COUNT=$((CONFIRM_COUNT + 1))
+	fi
+
+	local FLAG=$(($2 + 0))
+
+	if test $((FLAG & 2)) = 2; then
+		if test $((FLAG & 1)) = 1; then
+			CONFIRM=n
+		else
+			CONFIRM=y
+		fi
+
+		return
+	fi
+
+	while read -d $'\0' 
+	do
+		local CCKEY="--q$CONFIRM_COUNT"
+		if test "$REPLY" = "$CCKEY=y"; then
+			echo "found $CCKEY=y, accept: $1" 
+			CONFIRM=y
+		elif test "$REPLY" = "$CCKEY=n"; then
+			echo "found $CCKEY=n, reject: $1" 
+			CONFIRM=n
+		fi
+	done < /proc/$$/cmdline
+
+	if ! test -z "$CONFIRM"; then
+		# found -y or -n parameter
+		CONFIRM_TEXT="$CONFIRM"
+		return
+	fi
+
+	local DEFAULT=
+
+	if test $((FLAG & 1)) -ne 1; then
+		DEFAULT=n
+		echo -n "$1  y [n]  "
+		read -n1 -t 10 CONFIRM
+		echo
+	else
+		DEFAULT=y
+		echo -n "$1  [y] n  "
+		read -n1 -t 3 CONFIRM
+		echo
+	fi
+
+	if test -z "$CONFIRM"; then
+		CONFIRM=$DEFAULT
+	fi
+
+	CONFIRM_TEXT="$CONFIRM"
+
+	if test "$CONFIRM" != "y"; then
+		CONFIRM=n
+  fi
 }
 
 
@@ -61,15 +149,11 @@ function _docker_stop {
 # @return "$1_running"
 #------------------------------------------------------------------------------
 function _is_running {
+	_os_type linux
 
 	if test -z "$1"; then
 		_abort "no process name"
 	fi
-
-	local OS_TYPE=$(_os_type)
-	if test "$OS_TYPE" != "linux"; then
-		return
-	fi		
 
 	# use [a] = a to ignore "grep process"
 	local APACHE2='[a]pache2.*k start'
@@ -98,6 +182,31 @@ function _is_running {
 
 
 #------------------------------------------------------------------------------
+# Return linux, macos, cygwin.
+#
+# @print string (abort if set and os_type != $1)
+#------------------------------------------------------------------------------
+function _os_type {
+	local os=
+
+	if [ "$(uname)" = "Darwin" ]; then
+		os="macos"        
+	elif [ "$OSTYPE" = "linux-gnu" ]; then
+		os="linux"
+	elif [ $(expr substr $(uname -s) 1 5) = "Linux" ]; then
+		os="linux"
+	elif [ $(expr substr $(uname -s) 1 5) = "MINGW" ]; then
+		os="cygwin"
+	fi
+
+	if ! test -z "$1" && test "$1" != "$os"; then
+		_abort "$os required (this is $os)"
+	fi
+
+	echo $os
+}
+
+#------------------------------------------------------------------------------
 # Stop webserver (apache2, nginx) on port 80 if running.
 # Ignore docker webservice on port 80.
 #
@@ -105,11 +214,7 @@ function _is_running {
 # @os linux
 #------------------------------------------------------------------------------
 function _stop_http {
-
-  local OS_TYPE=$(_os_type)
-  if test "$OS_TYPE" != "linux"; then
-    return
-  fi
+  _os_type linux
 
   if test "$(_is_running PORT 80)" != "PORT_running"; then
     echo "no service on port 80"
@@ -168,10 +273,7 @@ function _syntax {
 #------------------------------------------------------------------------------
 function _export_docker_run {
 	if ! test -z "$DOCROOT_SOURCE" && test -d "$DOCROOT_SOURCE"; then
-		if test -z "$DOCROOT_TARGET"; then
-			DOCROOT_TARGET="/webhome/$DOCKER_NAME"
-		fi
-
+		test -z "$DOCROOT_TARGET" && DOCROOT_TARGET="/webhome/$DOCKER_NAME"
   	DOCKER_MOUNT="--mount type=bind,source=$DOCROOT_SOURCE,target=$DOCROOT_TARGET"
 	elif test -d /Users/$USER/Desktop/workspace; then
   	DOCKER_MOUNT="--mount type=bind,source=/Users/$USER/Desktop/workspace,target=/docker/workspace"
@@ -198,16 +300,17 @@ function _export_docker_run {
 #------------------------------------------------------------------------------
 
 APP=$0
+APP_DESC="Control docker. Autodetect name if DOCKER_NAME=MyContainer ./run.sh ... is not used."
 
-if ! test -f "$1"; then
-	_syntax "[linux/version/config.sh] [build|start|stop|run]\n\nDOCKER_NAME=MyContainer ./run.sh ubuntu/xenial/config.sh start" 
-fi
+export APP_PID="$APP_PID $$"
 
-LINUX_VERSION=`dirname $1`
+test -s "$1" || _syntax "path/to/config.sh build|start|stop|show|run"
 
-. $1
+CONFIG_DIR=`dirname "$1"`
 
-if test "$2" = "start" || test "$2" = "run"; then
+. $1 || _abort "load configuration $1 failed"
+
+if test "$2" = "start" || test "$2" = "run" || test "$2" = "show"; then
 	_export_docker_run
 fi
 
@@ -215,16 +318,16 @@ if test -z "$DOCKER_IMAGE"; then
 	_abort "export DOCKER_IMAGE in $1"
 fi
 
-if test -z "$DOCKER_NAME" && test "$2" != "build"; then
-	_abort "export DOCKER_NAME in shell or $1"
-fi
-
-if test -z "$DOCKER_DF" && test "$2" = "build"; then
-	if test -f $LINUX_VERSION/Dockerfile; then
+if test "$2" = "build"; then
+	if test -z "$DOCKER_DF" && test -s "$CONFIG_DIR/Dockerfile"; then
 		DOCKER_DF=Dockerfile
 	else
 		_abort "export DOCKER_DF=Dockerfile in $1"
 	fi
+elif test -z "$DOCKER_NAME"; then
+	DOCKER_NAME=`basename "$1" | sed -E 's/\.sh$//'`
+	_confirm "Use DOCKER_NAME=$DOCKER_NAME" 1
+	test "$CONFIRM" = "y" || _abort "export DOCKER_NAME in shell or $1"
 fi
 
 echo
@@ -232,7 +335,7 @@ echo
 case $2 in
 build)
 	echo -e "docker build -t $DOCKER_IMAGE $1\nYou might need to type in root password\n"
-	docker build -t $DOCKER_IMAGE -f $LINUX_VERSION/$DOCKER_DF $LINUX_VERSION
+	docker build -t $DOCKER_IMAGE -f "$CONFIG_DIR/$DOCKER_DF" "$CONFIG_DIR"
 	;;
 run)
 	HAS_DOCKER=`docker ps -a | grep "$DOCKER_NAME\$"`
@@ -241,6 +344,9 @@ run)
 	else
 		echo "docker start $DOCKER_NAME"
 	fi
+	;;
+show)
+	echo "docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE"
 	;;
 start)
 	if ! test -z "$STOP_HTTP"; then
@@ -260,7 +366,7 @@ stop)
 	_docker_stop $DOCKER_NAME
 	;;
 *)
-	_syntax "container/image [build|start|stop]"
+	_syntax "path/to/config.sh build|start|stop|show|run"
 esac
 
 echo
