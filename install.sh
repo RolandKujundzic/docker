@@ -1,27 +1,17 @@
 #!/bin/bash
 
-if test -s /usr/local/lib/rkscript.sh; then
-	. /usr/local/lib/rkscript.sh || exit 1
-elif test -s rkscript.sh; then
-	. rkscript.sh || exit 1
-else
-	wget -O rkscript.sh 'https://raw.githubusercontent.com/RolandKujundzic/rkscript/master/lib/rkscript.sh'
-
-	if ! test -s rkscript.sh; then
-		echo "checkout https://github.com/RolandKujundzic/rkscript/blob/master/lib/rkscript.sh as /usr/local/lib/rkscript.sh"
-		exit 1
-	fi
-
-	. rkscript.sh || exit 1
+if ! test -s '/usr/local/lib/rkscript.sh'; then
+	echo "download rkscript.sh as /usr/local/lib/rkscript.sh"
+	sudo wget -qO '/usr/local/lib/rkscript.sh' 'https://raw.githubusercontent.com/RolandKujundzic/rkscript/master/lib/rkscript.sh'
 fi
 
-
-declare -A GITHUB_LATEST
-declare -A GITHUB_IS_LATEST
+. '/usr/local/lib/rkscript.sh' || { echo -e "\nERROR: . /usr/local/lib/rkscript.sh\n"; exit 1; }
 
 
-#------------------------------------------------------------------------------
-function _install_docker {
+#--
+# Install docker
+#--
+function installDocker {
 	_github_latest docker/docker-ce docker
 	
 	if test "${GITHUB_IS_LATEST[docker]}" = "1"; then
@@ -39,46 +29,44 @@ function _install_docker {
 
 	if test -d /home/$SUDO_USER; then
 		echo "allow $SUDO_USER to run docker (login again)"
-		sudo usermod -aG docker $SUDO_USER
+		sudo usermod -a -G docker $SUDO_USER
 	fi
 }
 
 
-#------------------------------------------------------------------------------
-function _download {
-	_github_latest $1 $2
-	local LATEST="${GITHUB_LATEST[$2]}"
-	local VERSION=`uname -s`-`uname -m`
+#--
+# Install docker-compose|machine
+# @param compose|machine
+#--
+function downloadDocker {
+	local prog="docker-$1"
+	_github_latest "docker/$1" "$prog"
+	local latest="${GITHUB_LATEST[$prog]}"
+	local version=`uname -s`-`uname -m`
 
-	if test "${GITHUB_IS_LATEST[$2]}" = "1"; then
-		echo "latest $2 $LATEST is already installed"
-		return
-	fi
+	test "${GITHUB_IS_LATEST[$prog]}" = "1" && { echo "latest $prog $latest is already installed"; return; }
+	[[ -z "$latest" || -z "$version" ]] && _abort "download $prog failed"
 
-	if test -z "$LATEST" || test -z "$VERSION"; then
-		_abort "download $2 failed"
-	fi
+	local url="https://github.com/docker/$1/releases/download/$latest/$prog-$version"
+	echo "download $url"
+	echo "curl -L '$url' > '/usr/local/bin/$prog'" 
+	sudo sh -c "curl -L '$url' > '/usr/local/bin/$prog'" || _abort "download failed: $url"
 
-	echo "LATEST=[$LATEST] IS_LATEST=[${GITHUB_IS_LATEST[$2]}]"
-	local URL="https://github.com/$1/releases/download/$LATEST/$2-$VERSION"
-	echo "curl -L '$URL' > '/usr/local/bin/$2'" 
-	sudo sh -c "curl -L '$URL' > '/usr/local/bin/$2'" || _abort "download failed: $URL"
-
-	local IS_ELF=`file /usr/local/bin/$2 | grep -E 'ELF 64-bit LSB executable'`
-	if test -z "$IS_ELF"; then
-		_abort "/usr/local/bin/$2 no ELF 64-bit LSB executable"
-	fi
-
-	sudo chmod +x "/usr/local/bin/$2"
+	local is_elf=`file /usr/local/bin/$prog | grep -E 'ELF 64-bit LSB executable'`
+	test -z "$is_elf" && _abort "/usr/local/bin/$prog no ELF 64-bit LSB executable"
+	sudo chmod +x "/usr/local/bin/$prog"
 }
 
 
-#------------------------------------------------------------------------------
+#--
 # M A I N
-#------------------------------------------------------------------------------
+#--
+
+APP_DESC="Install docker[-compose|-machine]"
 
 _run_as_root 1
  
-_install_docker
-_download docker/compose docker-compose
-_download docker/machine docker-machine
+installDocker
+downloadDocker compose
+downloadDocker machine
+
