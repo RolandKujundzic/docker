@@ -1,80 +1,78 @@
 #!/bin/bash
+# shellcheck disable=SC2034,SC2086,SC2154,SC1090
 
-
-#------------------------------------------------------------------------------
+#---
 # Export DOCKER_RUN. Create sql:admin mysql account. Set UID and GID 
 # if /etc/passwd exists. Mount DOCROOT_SOURCE to /webhome/DOCKER_NAME (=DOCROOT_TARGET)
 # or /path/to/Desktop/workspace to /docker/workspace. Append DOCKER_PARAMETER
 # to DOCKER_RUN.
-#------------------------------------------------------------------------------
-function _export_docker_run {
+#
+# @global DOCROOT_SOURCE DOCKER_NAME DOCROOT_TARGET
+# @export DOCKER_RUN
+#---
+function export_docker_run {
+	local dmount set_uid sed_gid uid_gid
 	if ! test -z "$DOCROOT_SOURCE" && test -d "$DOCROOT_SOURCE"; then
 		test -z "$DOCROOT_TARGET" && DOCROOT_TARGET="/webhome/$DOCKER_NAME"
-  	DOCKER_MOUNT="--mount type=bind,source=$DOCROOT_SOURCE,target=$DOCROOT_TARGET"
-	elif test -d /Users/$USER/Desktop/workspace; then
-  	DOCKER_MOUNT="--mount type=bind,source=/Users/$USER/Desktop/workspace,target=/docker/workspace"
-	elif test -d /home/$USER/Desktop/workspace; then
-  	DOCKER_MOUNT="--mount type=bind,source=/home/$USER/Desktop/workspace,target=/docker/workspace"
+  	dmount="--mount type=bind,source=$DOCROOT_SOURCE,target=$DOCROOT_TARGET"
+	elif test -d "/Users/$USER/Desktop/workspace"; then
+  	dmount="--mount type=bind,source=/Users/$USER/Desktop/workspace,target=/docker/workspace"
+	elif test -d "/home/$USER/Desktop/workspace"; then
+  	dmount="--mount type=bind,source=/home/$USER/Desktop/workspace,target=/docker/workspace"
 	fi
 
 	if test -f /etc/passwd; then
-  	SET_UID=`id -u`
-  	SET_GID=`id -g`
+  	set_uid=$(id -u)
+  	set_gid=$(id -g)
 
-  	if test "$SET_GID" -ge 1000 && test "$SET_UID" -ge 1000
+  	if test "$set_gid" -ge 1000 && test "$set_uid" -ge 1000
   	then
-    	DOCKER_UID_GID="-e SET_UID=$SET_UID -e SET_GID=$SET_GID"
+    	uid_gid="-e set_uid=$set_uid -e set_gid=$set_gid"
   	fi
 	fi
 
-	DOCKER_RUN="-d -e SQL_PASS=admin $DOCKER_MOUNT $DOCKER_UID_GID $DOCKER_PARAMETER"
+	DOCKER_RUN="-d -e SQL_PASS=admin $dmount $uid_gid $DOCKER_PARAMETER"
 }
 
 
-#------------------------------------------------------------------------------
+#---
 # M A I N
-#------------------------------------------------------------------------------
+#---
 
-APP=$0
-APP_DESC="Control docker. Autodetect name if DOCKER_NAME=MyContainer ./run.sh ... is not used."
+APP_DESC='Control docker. Autodetect name unless: DOCKER_NAME=MyContainer ./run.sh …'
 
-export APP_PID="$APP_PID $$"
+_rks_app "$@"
 
-test -s "$1" || _syntax "path/to/config.sh build|start|stop|show|run"
+test -f "${ARG[1]}" || _syntax "path/to/config.sh build|start|stop|show|run"
+source "${ARG[1]}" || _abort "load configuration ${ARG[1]} failed"
 
-CONFIG_DIR=`dirname "$1"`
+CONFIG_DIR=$(dirname "${ARG[1]}")
 
-. $1 || _abort "load configuration $1 failed"
+_require_global DOCKER_IMAGE
 
-if test "$2" = "start" || test "$2" = "run" || test "$2" = "show"; then
-	_export_docker_run
-fi
+[[ "${ARG[2]}" = "start" || "${ARG[2]}" = "run" || "${ARG[2]}" = "show" ]] && export_docker_run
 
-if test -z "$DOCKER_IMAGE"; then
-	_abort "export DOCKER_IMAGE in $1"
-fi
-
-if test "$2" = "build"; then
+if [[ "${ARG[2]}" = "build" && ! -f "$CONFIG_DIR/$DOCKER_DF" ]]; then
 	if test -z "$DOCKER_DF" && test -s "$CONFIG_DIR/Dockerfile"; then
 		DOCKER_DF=Dockerfile
 	else
-		_abort "export DOCKER_DF=Dockerfile in $1"
+		_abort "export DOCKER_DF=Dockerfile in ${ARG[1]}"
 	fi
 elif test -z "$DOCKER_NAME"; then
-	DOCKER_NAME=`basename "$1" | sed -E 's/\.sh$//'`
+	DOCKER_NAME=$(basename "${ARG[1]}" | sed -E 's/\.sh$//')
 	_confirm "Use DOCKER_NAME=$DOCKER_NAME" 1
-	test "$CONFIRM" = "y" || _abort "export DOCKER_NAME in shell or $1"
+	test "$CONFIRM" = "y" || _abort "export DOCKER_NAME in shell or ${ARG[1]}"
 fi
 
 echo
 
-case $2 in
+case ${ARG[2]} in
 build)
-	echo -e "docker build -t $DOCKER_IMAGE $1\nYou might need to type in root password\n"
+	echo -e "docker build -t $DOCKER_IMAGE\nYou might need to type in root password\n"
 	docker build -t $DOCKER_IMAGE -f "$CONFIG_DIR/$DOCKER_DF" "$CONFIG_DIR"
 	;;
 run)
-	HAS_DOCKER=`docker ps -a | grep "$DOCKER_NAME\$"`
+	HAS_DOCKER=$(docker ps -a | grep "$DOCKER_NAME\$")
 	if test -z "$HAS_DOCKER"; then
 		echo "docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE"
 	else
@@ -89,7 +87,7 @@ start)
 		_stop_http
 	fi
 
-	HAS_DOCKER=`docker ps -a | grep "$DOCKER_NAME\$"`
+	HAS_DOCKER=$(docker ps -a | grep "$DOCKER_NAME\$")
 	if test -z "$HAS_DOCKER"; then
 		echo "docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE"
 		docker run $DOCKER_RUN --name $DOCKER_NAME $DOCKER_IMAGE
